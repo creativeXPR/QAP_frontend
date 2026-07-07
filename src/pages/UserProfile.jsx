@@ -1,0 +1,86 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import LogoutModal from "../components/common/LogoutModal";
+import { Briefcase, Building2, Mail, ShieldCheck, LogOut } from "lucide-react";
+
+const USER = {
+  name: "Dr. Adewale Olumide Johnson",
+  roleTag: "Principal Officer",
+  initials: "DA",
+  fields: [
+    { icon: Briefcase, label: "Role", value: "Principal Officer" },
+    { icon: Building2, label: "Department/Unit", value: "Principal Officer" },
+    { icon: Mail, label: "Email Address", value: "a.johnson@ui.edu.ng" },
+    { icon: ShieldCheck, label: "Access Level", value: "University-wide" },
+  ],
+};
+
+export default function UserProfile() {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigate = useNavigate();
+
+  const handleConfirmLogout = () => {
+    setShowLogoutModal(false);
+    navigate("/sign-in");
+  };
+
+  return (
+    <div className="bg-white min-h-screen">
+      <Navbar ctaLabel="Profile" ctaVariant="outline" showLogout={false} />
+
+      <main className="max-w-5xl mx-auto px-4 md:px-8 py-10">
+        <div className="rounded-lg border border-gray-100 shadow-sm p-6">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-start gap-4">
+              <span className="flex items-center justify-center w-14 h-14 rounded-full bg-brand text-white text-lg font-semibold shrink-0">
+                {USER.initials}
+              </span>
+
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900 mb-1">
+                  {USER.name}
+                </h1>
+                <a
+                  href="#"
+                  className="text-brand text-sm font-medium hover:underline"
+                >
+                  {USER.roleTag}
+                </a>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3 mt-4">
+                  {USER.fields.map(({ icon: Icon, label, value }) => (
+                    <div key={label} className="flex items-start gap-2">
+                      <Icon size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-gray-400">{label}</p>
+                        <p className="text-sm text-gray-800">{value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="flex items-center gap-2 text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 px-4 py-2 rounded-md shrink-0"
+            >
+              <LogOut size={15} />
+              Logout
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+
+      <LogoutModal
+        open={showLogoutModal}
+        onCancel={() => setShowLogoutModal(false)}
+        onConfirm={handleConfirmLogout}
+      />
+    </div>
+  );
+}
