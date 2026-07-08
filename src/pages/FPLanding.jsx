@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
-import Navbar from "../components/layout/Navbar";
-import Footer from "../components/layout/Footer";
-import AsyncState from "../components/common/AsyncState";
-import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard";
-import { useApiQuery } from "../hooks/useApiResource";
-import { getListItems, replaceListItem } from "../api/client";
-import { students } from "../api/services";
-import { mapFeedbackListForStaff } from "../lib/submissionMapper";
+import Navbar from "../components/layout/Navbar";           // shared top nav bar
+import Footer from "../components/layout/Footer";           // shared page footer
+import AsyncState from "../components/common/AsyncState";   // loading/error/empty wrapper (imported but not yet used below)
+import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard"; // imported but not yet rendered here
+import { useApiQuery } from "../hooks/useApiResource";       // hook: fires a GET on mount, tracks {data, loading, error}
+import { getListItems, replaceListItem } from "../api/client"; // helpers to read paginated list responses / patch one item in them
+import { students } from "../api/services";                 // grouped API calls under /api/students/...
+import { mapFeedbackListForStaff } from "../lib/submissionMapper"; // normalizes raw feedback API rows into UI-friendly case objects
 import {
   BarChart2,
   CheckCircle2,
@@ -26,14 +26,29 @@ import {
 // old vanilla-JS app). No equivalent resource exists in
 // api/services.js for Focal Persons yet.
 //
-// Once a real endpoint exists, replace with something like:
+// TO WIRE UP REAL DATA WHEN THE BACKEND ENDPOINTS EXIST:
 //
-//   const { data: formsResponse, loading: formsLoading } = useApiQuery(
-//     useCallback(() => students.forms.list(), [])  // or wherever this
-//   );                                              // ends up living
-//   const forms = getListItems(formsResponse);
+// 1. Add the resource to src/api/services.js, e.g. inside `students`:
+//      forms: createResource("/api/students/forms/"),
+//      updates: createResource("/api/students/updates/"),
+//    (see how `feedback: createResource("/api/students/feedback/")` is
+//    already defined there — follow that same pattern).
 //
-// Same pattern for `updates`.
+// 2. In this file, fetch it with useApiQuery exactly like `cases` below:
+//
+//      const { data: formsResponse, loading: formsLoading, error: formsError } =
+//        useApiQuery(useCallback(() => students.forms.list(), []));
+//      const forms = useMemo(() => getListItems(formsResponse), [formsResponse]);
+//
+//      const { data: updatesResponse, loading: updatesLoading } =
+//        useApiQuery(useCallback(() => students.updates.list(), []));
+//      const updates = useMemo(() => getListItems(updatesResponse), [updatesResponse]);
+//
+// 3. Replace PLACEHOLDER_FORMS.map(...) / PLACEHOLDER_UPDATES.map(...)
+//    below with forms.map(...) / updates.map(...), and wrap each section
+//    in <AsyncState loading={...} error={...}> (already imported above)
+//    so spinners/error states show automatically, matching the `cases`
+//    section's pattern.
 // =====================================================================
 
 const PLACEHOLDER_FORMS = [
@@ -60,6 +75,10 @@ const STATUS_STYLES = {
 };
 
 export default function FPLanding() {
+  // Live API call: GET /api/students/feedback/ on mount.
+  // `feedbackResponse` is the raw (possibly paginated) API payload;
+  // `setFeedbackResponse` lets us patch it locally after an update
+  // instead of re-fetching; `refetch` re-runs the GET on demand.
   const {
     data: feedbackResponse,
     loading,
@@ -68,11 +87,16 @@ export default function FPLanding() {
     setData: setFeedbackResponse,
   } = useApiQuery(useCallback(() => students.feedback.list(), []));
 
+  // Unwrap the raw response into a plain array, then normalize each row
+  // into the shape the UI/cards expect (status labels, urgency, etc.).
+  // Recomputes only when feedbackResponse actually changes.
   const cases = useMemo(
     () => mapFeedbackListForStaff(getListItems(feedbackResponse)),
     [feedbackResponse],
   );
 
+  // Derives the 4 summary stat cards from `cases` — no separate API
+  // call needed since it's just counting/filtering data already fetched.
   const stats = useMemo(
     () => [
       { label: "Total Cases", value: cases.length, icon: BarChart2 },
@@ -98,6 +122,9 @@ export default function FPLanding() {
     [cases],
   );
 
+  // Called after a case is edited elsewhere (e.g. a modal/detail view
+  // calling a PATCH endpoint) — splices the updated item back into
+  // `feedbackResponse` locally so the UI reflects it without a refetch.
   const handleCaseUpdated = (updated) => {
     setFeedbackResponse((prev) => replaceListItem(prev, updated.id, updated));
   };
@@ -106,7 +133,10 @@ export default function FPLanding() {
     <div className="bg-white min-h-screen">
       <Navbar />
 
-      {/* Hero */}
+      {/* Hero — static marketing/intro copy, no API data involved.
+          "Start Submission" / "View My Profile" buttons are inert;
+          wire them to navigation (e.g. react-router `useNavigate`)
+          once the target routes exist. */}
       <section className="max-w-3xl mx-auto text-center px-4 pt-14 pb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
           Welcome to the Quality Assurance Platform
@@ -135,7 +165,8 @@ export default function FPLanding() {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16 space-y-6">
-        {/* Stat cards */}
+        {/* Stat cards — driven by `stats` (derived from live `cases` data above).
+            Already wired to the API; no further integration needed here. */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((s) => (
             <div
@@ -155,7 +186,10 @@ export default function FPLanding() {
           ))}
         </div>
 
-        {/* Updates */}
+        {/* Updates — currently PLACEHOLDER_UPDATES (static array above).
+            See the "TO WIRE UP REAL DATA" comment near the top of this
+            file for how to swap in students.updates.list() once that
+            endpoint exists. */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
             <Bell size={15} />
@@ -196,7 +230,10 @@ export default function FPLanding() {
           )}
         </div>
 
-        {/* Available Forms */}
+        {/* Available Forms — currently PLACEHOLDER_FORMS (static array above).
+            See the "TO WIRE UP REAL DATA" comment near the top of this
+            file for how to swap in students.forms.list() once that
+            endpoint exists. */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
           <p className="text-sm font-semibold text-gray-900 mb-1">
             Available Forms

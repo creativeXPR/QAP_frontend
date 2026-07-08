@@ -1,14 +1,14 @@
 import { useCallback } from "react";
-import AdminTopNav from "../components/layout/AdminTopNav";
-import AdminFooter from "../components/layout/AdminFooter";
-import StatCard from "../components/dashboard/StatCard";
-import DataTable from "../components/dashboard/DataTable";
-import AsyncState from "../components/common/AsyncState";
-import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard";
-import { useApiQuery } from "../hooks/useApiResource";
-import { getListItems, replaceListItem, removeListItem } from "../api/client";
-import { students } from "../api/services";
-import { mapFeedbackListForStaff } from "../lib/submissionMapper";
+import AdminTopNav from "../components/layout/AdminTopNav";     // shared admin top nav
+import AdminFooter from "../components/layout/AdminFooter";     // shared admin footer
+import StatCard from "../components/dashboard/StatCard";        // small icon+label+value metric tile
+import DataTable from "../components/dashboard/DataTable";      // generic table (columns + rows + row actions)
+import AsyncState from "../components/common/AsyncState";       // wraps children with loading/error/empty UI
+import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard"; // renders one support/feedback case + actions
+import { useApiQuery } from "../hooks/useApiResource";          // hook: fires a GET on mount, tracks {data, loading, error}
+import { getListItems, replaceListItem, removeListItem } from "../api/client"; // helpers for paginated list responses (read/patch/remove one item)
+import { students } from "../api/services";                     // grouped API calls under /api/students/...
+import { mapFeedbackListForStaff } from "../lib/submissionMapper"; // normalizes raw feedback API rows into UI-friendly case objects
 import {
   Users,
   TrendingUp,
@@ -22,6 +22,41 @@ import {
 // yet (status requests, updates tables, user actions log, support
 // issues); placeholders matching the reference's Firestore-driven
 // content until real endpoints exist. =====
+//
+// TO WIRE UP REAL DATA WHEN THE BACKEND ENDPOINTS EXIST:
+// The overall pattern is always the same one already used for the
+// "User Support Issues" section at the bottom of this file (feedback
+// via `students.feedback.list()` + useApiQuery). For each table below:
+//
+//   1. Add/confirm the resource in src/api/services.js. Several likely
+//      already exist and just need wiring here, e.g.:
+//        - Form Logs / FP Updates  -> a new `students.forms` /
+//          `students.updates` resource (not yet defined), OR reuse
+//          `documents.documents` (createResource) if forms are modeled
+//          as institutional documents.
+//        - KPI Library / PO Updates -> `accreditation.metrics` /
+//          `accreditation.submissions` are close matches already
+//          exported from services.js.
+//        - FP/PO User Management   -> would need a `users` resource
+//          (not yet defined) — likely /api/accounts/users/ or similar.
+//        - User Actions log        -> `dashboards.activityFeed(params)`
+//          already exists in services.js and returns exactly this kind
+//          of feed.
+//        - Top-of-page stat numbers (Registered Users, Submission
+//          Rates, Report Generation Count, Focal/Principal/Admin User
+//          counts) -> `dashboards.summary(params)` already exists and
+//          is built for aggregate counts like these.
+//
+//   2. Fetch with useApiQuery, e.g.:
+//        const { data, loading, error } = useApiQuery(
+//          useCallback(() => dashboards.activityFeed(), [])
+//        );
+//        const rows = getListItems(data);
+//
+//   3. Swap the relevant *_ROWS constant for `rows` in the DataTable's
+//      `rows` prop, and wrap the table (or section) in <AsyncState
+//      loading={...} error={...}> so it matches the Support Issues
+//      section's loading/error/empty handling.
 
 const FORM_LOGS_COLUMNS = [
   { key: "title", label: "Form Title" },
@@ -118,6 +153,9 @@ function SectionHeaderButtons({ uploadLabel, deleteLabel, deleteHref }) {
 }
 
 export default function AdminPortal() {
+  // Live API call: GET /api/students/feedback/ on mount. This is the
+  // only section on this page already wired to a real endpoint —
+  // use it as the template for wiring the placeholder tables above.
   const {
     data: feedbackResponse,
     loading: feedbackLoading,
@@ -126,15 +164,21 @@ export default function AdminPortal() {
     setData: setFeedbackResponse,
   } = useApiQuery(useCallback(() => students.feedback.list(), []));
 
+  // Unwrap + normalize the raw response, then derive counts for the
+  // "Total / Pending / Resolved" summary shown in the Support Issues banner.
   const feedbackItems = mapFeedbackListForStaff(getListItems(feedbackResponse));
   const totalIssues = feedbackItems.length;
   const pendingIssues = feedbackItems.filter((i) => i.rawStatus !== "resolved").length;
   const resolvedIssues = feedbackItems.filter((i) => i.rawStatus === "resolved").length;
 
+  // Passed to FeedbackCaseCard so a reply/status change patches the
+  // local list in place instead of refetching the whole collection.
   const handleCaseUpdated = (updated) => {
     setFeedbackResponse((prev) => replaceListItem(prev, updated.id, updated));
   };
 
+  // Passed to FeedbackCaseCard so deleting a case removes it locally
+  // right after the DELETE request succeeds.
   const handleCaseDeleted = (id) => {
     setFeedbackResponse((prev) => removeListItem(prev, id));
   };
@@ -144,7 +188,9 @@ export default function AdminPortal() {
       <AdminTopNav />
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-10">
-        {/* System overview */}
+        {/* System overview — "1,247" is hardcoded. Replace with
+            dashboards.summary() (see top-of-file wiring notes) and pass
+            the returned count as `value` instead of a literal string. */}
         <section>
           <h2 className="text-base font-semibold text-gray-900 mb-1">
             System Overview
@@ -199,7 +245,10 @@ export default function AdminPortal() {
           </div> */}
         </section>
 
-        {/* FP Management */}
+        {/* FP Management — "Submission Rates" stat and all 3 tables below
+            (Form Logs, Updates, FP User Management) use the static
+            FORM_LOGS_ROWS / FP_UPDATES_ROWS / FP_USER_ROWS placeholders.
+            See top-of-file wiring notes for candidate endpoints. */}
         <section id="fpm">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div>
@@ -256,7 +305,12 @@ export default function AdminPortal() {
           </div>
         </section>
 
-        {/* User Infrastructure (PO Management) */}
+        {/* User Infrastructure (PO Management) — "Report Generation
+            Count" stat and all 3 tables (KPI Library, PO Updates, PO
+            User Management) use static row data. KPI Library / PO
+            Updates map well to accreditation.metrics /
+            accreditation.submissions in services.js; see top-of-file
+            wiring notes. */}
         <section id="pom">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <h2 className="text-base font-semibold text-gray-900">
@@ -307,6 +361,10 @@ export default function AdminPortal() {
             </div>
           </div>
 
+          {/* User Actions — static USER_ACTIONS array. Maps directly to
+              dashboards.activityFeed(params) already defined in
+              services.js — swap the .map() source for that response's
+              items once wired (see top-of-file wiring notes). */}
           <h3 className="text-sm font-semibold text-gray-900 mb-3">User Actions</h3>
           <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg bg-white">
             {USER_ACTIONS.map((action) => (
@@ -321,7 +379,11 @@ export default function AdminPortal() {
           </div>
         </section>
 
-        {/* System Analytics Dashboard */}
+        {/* System Analytics Dashboard — every number here (Focal/
+            Principal/Admin user counts, submission tracking bar, the
+            Users/Forms/KPIs summary lists) is hardcoded. This whole
+            section maps to dashboards.summary() / dashboards.timeline()
+            already in services.js; see top-of-file wiring notes. */}
         <section>
           <h2 className="text-base font-semibold text-gray-900 mb-1">
             System Analytics Dashboard
@@ -395,7 +457,10 @@ export default function AdminPortal() {
           </div>
         </section>
 
-        {/* User Support Issues */}
+        {/* User Support Issues — already fully wired to the live
+            students.feedback API via feedbackItems/feedbackLoading/
+            feedbackError above. Use this section as the reference
+            pattern for wiring the other placeholder sections. */}
         <section>
           <h2 className="text-base font-semibold text-gray-900 mb-1">
             User Support Issues
