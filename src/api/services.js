@@ -33,7 +33,7 @@ const lecturers = {
   profiles: {
     ...createResource("/api/lecturers/lecturer-profiles/"),
     summary: (id, params, options) =>
-      api.get(`/api/lecturers/lecturer-profiles/${id}/summary/`, params, options),
+      api.get(`/api/lecturers/lecturer-profiles/${id}/assessment_summary/`, params, options),
   },
   assessmentReports: createResource("/api/lecturers/assessment-reports/"),
 };

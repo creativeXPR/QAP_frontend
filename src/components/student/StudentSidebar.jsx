@@ -12,8 +12,8 @@ import {
 
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/student/dashboard", icon: LayoutDashboard, end: true },
-  { label: "New Submission", to: "/student/reports", icon: PlusSquare, end: true },
-  { label: "Submissions", to: "/student/reports/new", icon: BarChart2, end: true },
+  { label: "New Submission", to: "/student/reports/new", icon: PlusSquare, end: true },
+  { label: "Submissions", to: "/student/reports", icon: BarChart2, end: true },
   { label: "Notifications", to: "/student/notifications", icon: Bell, end: true },
   { label: "Profile", to: "/student/profile", icon: UserCircle, end: true },
 ];
