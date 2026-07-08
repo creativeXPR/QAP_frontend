@@ -60,7 +60,7 @@ export default function SignUp() {
       <div className="hidden md:flex md:w-1/2 bg-brand flex-col items-center justify-center px-10 py-16 text-center">
         <img src="/logo.png" alt="University crest" className="h-20 w-auto object-contain mb-6" />
         <h1 className="text-white text-2xl font-semibold mb-3">
-          Quality Assurance Excellence
+          University of Ibadan Directorate of Quality Assurance
         </h1>
         <p className="text-blue-100 text-sm max-w-xs">
           Streamlining institutional quality management and continuous

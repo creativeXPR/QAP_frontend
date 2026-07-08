@@ -40,7 +40,7 @@ export default function StudentDashboard() {
     console.log(recentReports);
 
   const stats = [
-    { label: "Total Reports", value: recentReports.length, icon: BarChart2 },
+    { label: "Total Submissions", value: recentReports.length, icon: BarChart2 },
     {
       label: "Resolved",
       value: recentReports.filter((item) => item.rawStatus === "resolved").length,
@@ -135,7 +135,7 @@ export default function StudentDashboard() {
           <div className="flex items-center justify-between mb-1 flex-wrap gap-3">
             <div>
               <p className="text-sm font-semibold text-gray-900">
-                Recent Reports
+                Recent Submissions
               </p>
               <p className="text-xs text-gray-400">
                 Overview of your submitted reports
