@@ -12,6 +12,12 @@ const BADGE_STYLES = {
   "View Only": "bg-gray-100 text-gray-500",
   "Academic View": "bg-blue-50 text-blue-600",
   "University-wide": "bg-purple-50 text-purple-600",
+  Pending: "bg-amber-50 text-amber-600",
+  "Under Review": "bg-blue-50 text-blue-600",
+  Resolved: "bg-emerald-50 text-emerald-600",
+  Critical: "bg-red-50 text-red-500",
+  High: "bg-red-50 text-red-500",
+  Normal: "bg-gray-100 text-gray-500",
 };
 
 function Badge({ value }) {

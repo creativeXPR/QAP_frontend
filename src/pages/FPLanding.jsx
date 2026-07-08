@@ -1,65 +1,28 @@
+import { useCallback } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import FormCard from "../components/dashboard/FormCard";
-
-const AVAILABLE_FORMS = [
-  {
-    category: "Academic",
-    title: "Evaluation of Examination Processes",
-    status: "New",
-    dueDate: "January 15, 2026",
-    action: "Start",
-  },
-  {
-    category: "Administrative",
-    title: "Staff Performance Evaluation",
-    status: "Pending",
-    dueDate: "January 15, 2026",
-    action: "Continue",
-  },
-  {
-    category: "Academic",
-    title: "Infrastructure Assessment",
-    status: "New",
-    dueDate: "January 15, 2026",
-    action: "Start",
-  },
-  {
-    category: "Academic",
-    title: "Course Content Review",
-    status: "Pending",
-    dueDate: "January 15, 2026",
-    action: "Continue",
-  },
-  {
-    category: "Administrative",
-    title: "Service Quality Feedback",
-    status: "Completed",
-    action: "View",
-  },
-  {
-    category: "Academic",
-    title: "Teaching Methods Assessment",
-    status: "New",
-    dueDate: "January 15, 2026",
-    action: "Start",
-  },
-  {
-    category: "Academic",
-    title: "Laboratory Safety Compliance",
-    status: "Pending",
-    dueDate: "January 15, 2026",
-    action: "Continue",
-  },
-  {
-    category: "Administrative",
-    title: "Administrative Services Survey",
-    status: "Completed",
-    action: "View",
-  },
-];
+import AsyncState from "../components/common/AsyncState";
+import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard";
+import { useApiQuery } from "../hooks/useApiResource";
+import { getListItems, replaceListItem } from "../api/client";
+import { students } from "../api/services";
+import { mapFeedbackListForStaff } from "../lib/submissionMapper";
 
 export default function FPLanding() {
+  const {
+    data: feedbackResponse,
+    loading,
+    error,
+    refetch,
+    setData: setFeedbackResponse,
+  } = useApiQuery(useCallback(() => students.feedback.list(), []));
+
+  const cases = mapFeedbackListForStaff(getListItems(feedbackResponse));
+
+  const handleCaseUpdated = (updated) => {
+    setFeedbackResponse((prev) => replaceListItem(prev, updated.id, updated));
+  };
+
   return (
     <div className="bg-white min-h-screen">
       <Navbar />
@@ -92,20 +55,32 @@ export default function FPLanding() {
         />
       </section>
 
-      {/* Available forms */}
+      {/* Case queue */}
       <section className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">
-          Available Forms
+          Assigned Cases
         </h2>
         <p className="text-sm text-gray-500 mb-6">
-          Select a form to begin or continue a submission.
+          Student complaints and feedback awaiting review.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {AVAILABLE_FORMS.map((form) => (
-            <FormCard key={form.title} {...form} />
+        <AsyncState
+          loading={loading}
+          error={error}
+          empty={cases.length === 0}
+          onRetry={refetch}
+          loadingLabel="Loading assigned cases..."
+          emptyLabel="No cases assigned yet."
+        >
+          {cases.map((item) => (
+            <FeedbackCaseCard
+              key={item.id}
+              item={item}
+              actions={["reply", "status"]}
+              onUpdated={handleCaseUpdated}
+            />
           ))}
-        </div>
+        </AsyncState>
       </section>
 
       <Footer />

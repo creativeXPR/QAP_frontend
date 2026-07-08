@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useCallback } from "react";
 import AdminTopNav from "../components/layout/AdminTopNav";
 import AdminFooter from "../components/layout/AdminFooter";
 import StatCard from "../components/dashboard/StatCard";
 import DataTable from "../components/dashboard/DataTable";
+import AsyncState from "../components/common/AsyncState";
+import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard";
+import { useApiQuery } from "../hooks/useApiResource";
+import { getListItems, replaceListItem, removeListItem } from "../api/client";
+import { students } from "../api/services";
+import { mapFeedbackListForStaff } from "../lib/submissionMapper";
 import {
   Users,
   TrendingUp,
@@ -93,27 +99,6 @@ const USER_ACTIONS = [
   { name: "Mr. Tunde Babatunde", time: "2026-07-05 09:15:42" },
 ];
 
-const SUPPORT_ISSUES = [
-  {
-    id: 1,
-    name: "Adaeze Okonkwo",
-    category: "Login/Access Issue",
-    email: "a.okonkwo@stu.ui.edu.ng",
-    date: "05/07/2026",
-    resolved: false,
-    message: "I keep getting an invalid credentials error even though my password is correct.",
-  },
-  {
-    id: 2,
-    name: "Bello Musa",
-    category: "Form Submission Error",
-    email: "b.musa@stu.ui.edu.ng",
-    date: "03/07/2026",
-    resolved: true,
-    message: "My hostel complaint form failed to submit twice before finally going through.",
-  },
-];
-
 function SectionHeaderButtons({ uploadLabel, deleteLabel, deleteHref }) {
   return (
     <div className="flex gap-3 flex-wrap">
@@ -132,77 +117,27 @@ function SectionHeaderButtons({ uploadLabel, deleteLabel, deleteHref }) {
   );
 }
 
-function SupportIssueCard({ issue }) {
-  const [open, setOpen] = useState(false);
-  const [reply, setReply] = useState("");
-
-  return (
-    <div className="border border-gray-100 rounded-lg bg-white mb-3 overflow-hidden">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 p-4 text-left"
-      >
-        <div>
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h3 className="text-sm font-semibold text-gray-900">{issue.name}</h3>
-            <span className="text-[11px] font-medium text-brand bg-brand/5 px-2 py-0.5 rounded-full">
-              {issue.category}
-            </span>
-            <span
-              className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                issue.resolved
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "bg-amber-50 text-amber-600"
-              }`}
-            >
-              {issue.resolved ? "Resolved" : "Pending"}
-            </span>
-          </div>
-          <p className="text-xs text-gray-400">
-            {issue.email} · {issue.date}
-          </p>
-        </div>
-      </button>
-
-      {open && (
-        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
-          <p className="text-xs font-semibold text-gray-500 mb-1">Message:</p>
-          <p className="text-sm text-gray-700 mb-4">{issue.message}</p>
-
-          <p className="text-xs font-semibold text-gray-500 mb-1">Admin Reply:</p>
-          <textarea
-            value={reply}
-            onChange={(e) => setReply(e.target.value)}
-            rows={3}
-            placeholder="Write a reply to this user..."
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand resize-none"
-          />
-
-          <div className="flex gap-2 flex-wrap">
-            <button className="text-base font-medium bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded-[10px]">
-              Send Reply
-            </button>
-            <button
-              className={`text-sm font-medium px-4 py-2 rounded-md text-white ${
-                issue.resolved ? "bg-amber-500 hover:bg-amber-600" : "bg-emerald-600 hover:bg-emerald-700"
-              }`}
-            >
-              Mark as {issue.resolved ? "Pending" : "Resolved"}
-            </button>
-            <button className="text-base font-medium border border-gray-200 text-gray-500 px-4 py-2 rounded-[10px] hover:bg-gray-50">
-              Delete
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function AdminPortal() {
-  const totalIssues = SUPPORT_ISSUES.length;
-  const pendingIssues = SUPPORT_ISSUES.filter((i) => !i.resolved).length;
-  const resolvedIssues = SUPPORT_ISSUES.filter((i) => i.resolved).length;
+  const {
+    data: feedbackResponse,
+    loading: feedbackLoading,
+    error: feedbackError,
+    refetch: refetchFeedback,
+    setData: setFeedbackResponse,
+  } = useApiQuery(useCallback(() => students.feedback.list(), []));
+
+  const feedbackItems = mapFeedbackListForStaff(getListItems(feedbackResponse));
+  const totalIssues = feedbackItems.length;
+  const pendingIssues = feedbackItems.filter((i) => i.rawStatus !== "resolved").length;
+  const resolvedIssues = feedbackItems.filter((i) => i.rawStatus === "resolved").length;
+
+  const handleCaseUpdated = (updated) => {
+    setFeedbackResponse((prev) => replaceListItem(prev, updated.id, updated));
+  };
+
+  const handleCaseDeleted = (id) => {
+    setFeedbackResponse((prev) => removeListItem(prev, id));
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -482,9 +417,24 @@ export default function AdminPortal() {
             </div>
           </div>
 
-          {SUPPORT_ISSUES.map((issue) => (
-            <SupportIssueCard key={issue.id} issue={issue} />
-          ))}
+          <AsyncState
+            loading={feedbackLoading}
+            error={feedbackError}
+            empty={feedbackItems.length === 0}
+            onRetry={refetchFeedback}
+            loadingLabel="Loading support issues..."
+            emptyLabel="No support issues reported yet."
+          >
+            {feedbackItems.map((item) => (
+              <FeedbackCaseCard
+                key={item.id}
+                item={item}
+                actions={["reply", "status", "delete"]}
+                onUpdated={handleCaseUpdated}
+                onDeleted={handleCaseDeleted}
+              />
+            ))}
+          </AsyncState>
         </section>
       </main>
 

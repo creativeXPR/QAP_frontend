@@ -1,185 +1,84 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import POTopNav from "../components/layout/POTopNav";
 import AdminFooter from "../components/layout/AdminFooter";
 import StatCard from "../components/dashboard/StatCard";
+import DataTable from "../components/dashboard/DataTable";
+import AsyncState from "../components/common/AsyncState";
+import { useApiQuery } from "../hooks/useApiResource";
+import { getListItems } from "../api/client";
+import { students } from "../api/services";
+import { mapFeedbackListForStaff } from "../lib/submissionMapper";
 import {
   Search,
-  ChevronDown,
   FileText,
   Clock3,
   Bell,
-  BarChart2,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  BookOpen,
-  Briefcase,
+  AlertTriangle,
+  CheckCircle2,
 } from "../lib/icons";
 
-// Sample data — no backend wiring for Updates/KPIs yet, matching the
-// reference prototype's Firestore-driven cards but with placeholder
-// content for now.
-const UPDATES = [
-  {
-    type: "Academic",
-    title: "New Curriculum Review Guidelines",
-    tag: "Announcement",
-    dueDate: "20/7/2026",
-    links: [{ title: "View Document", url: "#" }],
-  },
-  {
-    type: "Administrative",
-    title: "Budget Submission Deadline Extended",
-    tag: "Urgent",
-    dueDate: "15/7/2026",
-    links: [{ title: "View Update", url: "#" }],
-  },
+const CATEGORY_OPTIONS = ["All Categories", "Academic", "Welfare", "Facility", "Administrative", "Other"];
+const STATUS_OPTIONS = ["All Status", "Pending", "Under Review", "Resolved"];
+
+const FEEDBACK_COLUMNS = [
+  { key: "title", label: "Feedback" },
+  { key: "category", label: "Category", type: "badge" },
+  { key: "urgency", label: "Urgency", type: "badge" },
+  { key: "status", label: "Status", type: "badge" },
+  { key: "submittedAt", label: "Submitted" },
 ];
 
-const KPIS = [
-  {
-    title: "Overall Completion Rate",
-    category: "Academic",
-    status: "Improving",
-    value: "87.3%",
-    changePercent: "+5.2%",
-    changePeriod: "vs last month",
-    analysisText:
-      "Completion rates across academic departments have trended upward this quarter, driven by improved submission reminders.",
-  },
-  {
-    title: "Administrative Turnaround Time",
-    category: "Administrative",
-    status: "Stable",
-    value: "3.2 days",
-    changePercent: "+0.1%",
-    changePeriod: "vs last month",
-    analysisText:
-      "Average processing time for administrative requests has held steady, within the target range for this cycle.",
-  },
-  {
-    title: "Infrastructure Maintenance Requests",
-    category: "Infrastructure",
-    status: "Declining",
-    value: "142",
-    changePercent: "-3.4%",
-    changePeriod: "vs last month",
-    analysisText:
-      "Open maintenance requests have decreased slightly, though response times in some faculties still need attention.",
-  },
-];
-
-const TYPE_ICON = {
-  Academic: BookOpen,
-  Administrative: Briefcase,
-};
-
-const STATUS_STYLES = {
-  Improving: { icon: TrendingUp, className: "text-emerald-600 bg-emerald-50" },
-  Stable: { icon: Minus, className: "text-amber-600 bg-amber-50" },
-  Declining: { icon: TrendingDown, className: "text-red-500 bg-red-50" },
-};
-
-function UpdateCard({ update }) {
-  const Icon = TYPE_ICON[update.type] || FileText;
-  return (
-    <div className="border border-gray-100 rounded-lg p-4 bg-white">
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-brand/5 px-2 py-1 rounded-full mb-3">
-        <Icon size={13} />
-        {update.type}
-      </span>
-      <h3 className="text-sm font-semibold text-gray-900 mb-2">{update.title}</h3>
-      <span className="inline-block text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mb-2">
-        {update.tag}
-      </span>
-      <p className="text-xs text-gray-400 mb-3">Due: {update.dueDate}</p>
-      {update.links.map((link) => (
-        <a
-          key={link.title}
-          href={link.url}
-          className="block text-center text-base font-medium bg-brand hover:bg-brand-dark text-white py-2 rounded-[10px]"
-        >
-          {link.title}
-        </a>
-      ))}
-    </div>
-  );
-}
-
-function KPICard({ kpi }) {
-  const [open, setOpen] = useState(false);
-  const { icon: StatusIcon, className: statusClass } =
-    STATUS_STYLES[kpi.status] || STATUS_STYLES.Stable;
-
-  return (
-    <div className="border border-gray-100 rounded-lg bg-white mb-3 overflow-hidden">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 p-4 text-left"
-      >
-        <div>
-          <h3 className="text-sm font-semibold text-gray-900">{kpi.title}</h3>
-          <p className="text-xs text-gray-400 mt-0.5">{kpi.category}</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span
-            className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${statusClass}`}
-          >
-            <StatusIcon size={12} />
-            {kpi.status}
-          </span>
-          <ChevronDown
-            size={16}
-            className={`text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </div>
-      </button>
-
-      {open && (
-        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-2xl font-semibold text-brand">{kpi.value}</span>
-            <span className="text-xs text-gray-400">
-              {kpi.changePercent} ({kpi.changePeriod})
-            </span>
-          </div>
-          <p className="text-sm text-gray-500 leading-relaxed">{kpi.analysisText}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function CollapsibleSection({ icon: Icon, title, subtitle, children }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <section>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 border border-gray-100 rounded-lg px-4 py-3 bg-white sticky top-0 z-10"
-      >
-        <div className="text-left">
-          <h2 className="flex items-center gap-2 text-brand font-semibold text-base">
-            <Icon size={16} />
-            {title}
-          </h2>
-          <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
-        </div>
-        <ChevronDown
-          size={18}
-          className={`text-gray-400 transition-transform shrink-0 ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {open && <div className="mt-4">{children}</div>}
-    </section>
-  );
+function truncate(text, length = 70) {
+  if (!text) return "";
+  return text.length > length ? `${text.slice(0, length)}…` : text;
 }
 
 export default function PODashboard() {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [status, setStatus] = useState("all");
+  const [category, setCategory] = useState("All Categories");
+  const [status, setStatus] = useState("All Status");
+
+  const {
+    data: feedbackResponse,
+    loading,
+    error,
+    refetch,
+  } = useApiQuery(useCallback(() => students.feedback.list(), []));
+
+  const feedbackItems = useMemo(
+    () => mapFeedbackListForStaff(getListItems(feedbackResponse)),
+    [feedbackResponse],
+  );
+
+  const stats = useMemo(
+    () => ({
+      total: feedbackItems.length,
+      pending: feedbackItems.filter((i) => i.rawStatus === "pending").length,
+      resolved: feedbackItems.filter((i) => i.rawStatus === "resolved").length,
+      highUrgency: feedbackItems.filter((i) => i.rawUrgency === "high" || i.rawUrgency === "critical").length,
+    }),
+    [feedbackItems],
+  );
+
+  const filteredItems = useMemo(() => {
+    return feedbackItems.filter((item) => {
+      const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = category === "All Categories" || item.category === category;
+      const matchesStatus = status === "All Status" || item.status === status;
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [feedbackItems, search, category, status]);
+
+  const tableRows = filteredItems.map((item) => ({
+    ...item,
+    title: truncate(item.title),
+  }));
+
+  const resetFilters = () => {
+    setSearch("");
+    setCategory("All Categories");
+    setStatus("All Status");
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -196,9 +95,11 @@ export default function PODashboard() {
         </div>
 
         {/* Overview stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <StatCard icon={FileText} label="Total KPIs" value="24" />
-          <StatCard icon={Clock3} label="Total PMP Updates" value="8" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard icon={FileText} label="Total Complaints & Feedback" value={stats.total} />
+          <StatCard icon={Clock3} label="Pending" value={stats.pending} />
+          <StatCard icon={CheckCircle2} label="Resolved" value={stats.resolved} />
+          <StatCard icon={AlertTriangle} label="High/Critical Urgency" value={stats.highUrgency} />
         </div>
 
         {/* Filters */}
@@ -208,7 +109,7 @@ export default function PODashboard() {
             Data Filters & Controls
           </h2>
           <p className="text-xs text-gray-400 mb-4">
-            Search and filter KPIs by title, category and status
+            Search and filter complaints/feedback by title, category and status
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -219,7 +120,7 @@ export default function PODashboard() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search KPI title..."
+                  placeholder="Search feedback text..."
                   className="text-sm w-full outline-none placeholder-gray-400"
                 />
               </div>
@@ -232,10 +133,11 @@ export default function PODashboard() {
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600"
               >
-                <option value="all">All Categories</option>
-                <option value="academic">Academic</option>
-                <option value="administrative">Administrative</option>
-                <option value="infrastructure">Infrastructure</option>
+                {CATEGORY_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -246,47 +148,50 @@ export default function PODashboard() {
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600"
               >
-                <option value="all">All Status</option>
-                <option value="improving">Improving</option>
-                <option value="stable">Stable</option>
-                <option value="declining">Declining</option>
+                {STATUS_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           <div className="flex gap-3 mt-4">
-            <button className="text-base text-brand border border-gray-200 px-4 py-2 rounded-[10px] hover:bg-gray-50">
+            <button
+              onClick={resetFilters}
+              className="text-base text-brand border border-gray-200 px-4 py-2 rounded-[10px] hover:bg-gray-50"
+            >
               Reset Filters
-            </button>
-            <button className="text-base text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-[10px]">
-              Apply Filters
             </button>
           </div>
         </section>
 
-        {/* Updates (collapsible) */}
-        <CollapsibleSection
-          icon={Bell}
-          title="Updates"
-          subtitle="Principal updates with expandable cards for better readability"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {UPDATES.map((update) => (
-              <UpdateCard key={update.title} update={update} />
-            ))}
-          </div>
-        </CollapsibleSection>
+        {/* Complaints & feedback overview */}
+        <section>
+          <h2 className="flex items-center gap-2 text-brand font-semibold text-base mb-1">
+            <Bell size={16} />
+            Complaints & Feedback Overview
+          </h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Read-only view of student complaints and feedback submitted platform-wide
+          </p>
 
-        {/* KPIs (collapsible, each card independently collapsible) */}
-        <CollapsibleSection
-          icon={BarChart2}
-          title="KPIs"
-          subtitle="KPI cards with expandable descriptions and charts"
-        >
-          {KPIS.map((kpi) => (
-            <KPICard key={kpi.title} kpi={kpi} />
-          ))}
-        </CollapsibleSection>
+          <AsyncState
+            loading={loading}
+            error={error}
+            empty={filteredItems.length === 0}
+            onRetry={refetch}
+            loadingLabel="Loading complaints & feedback..."
+            emptyLabel={
+              feedbackItems.length === 0
+                ? "No complaints or feedback have been submitted yet."
+                : "No records match your filters."
+            }
+          >
+            <DataTable columns={FEEDBACK_COLUMNS} rows={tableRows} />
+          </AsyncState>
+        </section>
       </main>
 
       <AdminFooter />

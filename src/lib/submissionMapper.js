@@ -1,4 +1,4 @@
-function formatLabel(value) {
+export function formatLabel(value) {
   if (!value) return "General";
 
   const normalized = String(value).toLowerCase().replace(/_/g, " ");
@@ -66,4 +66,40 @@ export function mapSubmissionFromApi(item) {
 
 export function mapSubmissionsFromApi(items = []) {
   return items.map(mapSubmissionFromApi);
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+}
+
+/**
+ * Staff-facing view of a feedback/complaint record (Admin/PO/FP), as
+ * opposed to mapSubmissionFromApi's student-facing view — surfaces the
+ * staff-only fields (admin_comment, assigned_to, submitted_by) that
+ * students never see.
+ */
+export function mapFeedbackForStaff(item) {
+  return {
+    id: item?.id,
+    studentName: item?.submitted_by_username || item?.student || "Anonymous",
+    studentEmail: item?.student_email || "",
+    title: item?.feedback || "Untitled submission",
+    category: formatLabel(item?.classification || item?.category || "General"),
+    submissionType: formatLabel(item?.category || ""),
+    urgency: formatLabel(item?.urgency || "normal"),
+    rawUrgency: item?.urgency || "normal",
+    status: formatLabel(item?.status || "pending"),
+    rawStatus: item?.status || "pending",
+    submissionMode: formatLabel(item?.submission_mode || ""),
+    adminComment: item?.admin_comment || "",
+    assignedTo: item?.assigned_to || null,
+    submittedAt: formatDate(item?.submitted_at),
+    updatedAt: formatDate(item?.updated_at),
+  };
+}
+
+export function mapFeedbackListForStaff(items = []) {
+  return items.map(mapFeedbackForStaff);
 }

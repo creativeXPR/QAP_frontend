@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentLayout from "../../components/student/StudentLayout";
+import AsyncState from "../../components/common/AsyncState";
 import {
   BarChart2,
   CheckCircle2,
@@ -17,6 +18,7 @@ import {
 import { getListItems } from "../../api/client";
 import { students } from "../../api/services";
 import { mapSubmissionsFromApi } from "../../lib/submissionMapper";
+import { useApiQuery } from "../../hooks/useApiResource";
 
 const CATEGORIES = [
   { label: "Academics", icon: FileText },
@@ -35,48 +37,37 @@ const STATUS_STYLES = {
 
 
 export default function StudentDashboard() {
-    const navigate = useNavigate();
-    const [recentReports, setRecentReports] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { data, loading, error, refetch } = useApiQuery(
+    useCallback(() => students.feedbackTracking.list(), []),
+  );
+
+  // All of the student's reports — stats below must reflect this full
+  // list, not just the handful shown in "Recent Submissions".
+  const allReports = useMemo(() => mapSubmissionsFromApi(getListItems(data)), [data]);
+  const recentReports = allReports.slice(0, 3);
 
   const stats = [
-    { label: "Total Submissions", value: recentReports.length, icon: BarChart2 },
+    { label: "Total Submissions", value: allReports.length, icon: BarChart2 },
     {
       label: "Resolved",
-      value: recentReports.filter((item) => item.rawStatus === "resolved").length,
+      value: allReports.filter((item) => item.rawStatus === "resolved").length,
       icon: CheckCircle2,
       iconBg: "bg-emerald-50 text-emerald-600",
     },
     {
       label: "In Review",
-      value: recentReports.filter((item) => item.rawStatus === "under_review").length,
+      value: allReports.filter((item) => item.rawStatus === "under_review").length,
       icon: Hourglass,
       iconBg: "bg-amber-50 text-amber-600",
     },
     {
       label: "Pending",
-      value: recentReports.filter((item) => item.rawStatus === "pending").length,
+      value: allReports.filter((item) => item.rawStatus === "pending").length,
       icon: Loader2,
       iconBg: "bg-gray-100 text-gray-500",
     },
   ];
-
-  useEffect(() => {
-    async function loadRecentReports() {
-      try {
-        const data = await students.feedbackTracking.list();
-        const payload = getListItems(data);
-        setRecentReports(mapSubmissionsFromApi(payload).slice(0, 3));
-      } catch (error) {
-        console.error("Failed to load recent reports:", error);
-        setRecentReports([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadRecentReports();
-  }, []);
 
   return (
     <StudentLayout sessionLabel="This Semester">
@@ -147,16 +138,15 @@ export default function StudentDashboard() {
           </div>
 
           <div className="divide-y divide-gray-100 mt-3">
-            {loading ? (
-              <p className="text-sm text-gray-500 py-4">
-                Loading recent reports...
-              </p>
-            ) : recentReports.length === 0 ? (
-              <p className="text-sm text-gray-500 py-4">
-                No recent reports found.
-              </p>
-            ) : (
-              recentReports.map((r) => (
+            <AsyncState
+              loading={loading}
+              error={error}
+              empty={recentReports.length === 0}
+              onRetry={refetch}
+              loadingLabel="Loading recent reports..."
+              emptyLabel="No recent reports found."
+            >
+              {recentReports.map((r) => (
                 <div
                   key={r.id}
                   className="flex items-center justify-between py-4 flex-wrap gap-2"
@@ -183,8 +173,8 @@ export default function StudentDashboard() {
                     {r.status}
                   </span>
                 </div>
-              ))
-            )}
+              ))}
+            </AsyncState>
           </div>
         </div>
       </div>

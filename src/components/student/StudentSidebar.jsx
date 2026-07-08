@@ -1,5 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { X } from "../../lib/icons";
+import { getStoredUser } from "../../lib/auth";
+import { formatLabel } from "../../lib/submissionMapper";
 import {
   LayoutDashboard,
   BarChart2,
@@ -75,17 +77,18 @@ function SidebarContent({ user, onNavigate }) {
  * from StudentLayout's mobile top bar.
  */
 
-let userData = JSON.parse(localStorage.getItem("user"));
-export default function StudentSidebar({
-  user = { name: userData?.username || "username", role: userData?.status || "Student" },
-  open = false,
-  onClose = () => {},
-}) {
+export default function StudentSidebar({ user, open = false, onClose = () => {} }) {
+  const storedUser = getStoredUser();
+  const resolvedUser = user ?? {
+    name: storedUser?.username || "Student",
+    role: formatLabel(storedUser?.status || "student"),
+  };
+
   return (
     <>
       {/* Desktop rail — fixed so it never scrolls with page content */}
       <aside className="hidden md:flex md:w-64 md:fixed md:inset-y-0 md:left-0 border-r border-gray-100 bg-white flex-col justify-between overflow-y-auto z-20">
-        <SidebarContent user={user} onNavigate={() => {}} />
+        <SidebarContent user={resolvedUser} onNavigate={() => {}} />
       </aside>
 
       {/* Mobile drawer */}
@@ -107,7 +110,7 @@ export default function StudentSidebar({
               </button>
             </div>
             <div className="flex-1 flex flex-col justify-between -mt-8">
-              <SidebarContent user={user} onNavigate={onClose} />
+              <SidebarContent user={resolvedUser} onNavigate={onClose} />
             </div>
           </aside>
         </div>

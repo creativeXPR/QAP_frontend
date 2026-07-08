@@ -209,6 +209,25 @@ export function getListItems(response) {
   return [];
 }
 
+// Replace/remove a single record inside a list response, preserving
+// whichever of the three shapes above the response came in — for
+// optimistic UI updates after a create/update/delete on one item.
+export function replaceListItem(response, id, updatedItem) {
+  const replace = (items) => items.map((item) => (item.id === id ? updatedItem : item));
+  if (Array.isArray(response)) return replace(response);
+  if (Array.isArray(response?.data)) return { ...response, data: replace(response.data) };
+  if (Array.isArray(response?.results)) return { ...response, results: replace(response.results) };
+  return response;
+}
+
+export function removeListItem(response, id) {
+  const remove = (items) => items.filter((item) => item.id !== id);
+  if (Array.isArray(response)) return remove(response);
+  if (Array.isArray(response?.data)) return { ...response, data: remove(response.data) };
+  if (Array.isArray(response?.results)) return { ...response, results: remove(response.results) };
+  return response;
+}
+
 export const api = {
   get: (path, params, options) => apiRequest(path, { ...options, method: "GET", params }),
   post: (path, payload, options) => apiRequest(path, { ...options, method: "POST", body: payload }),

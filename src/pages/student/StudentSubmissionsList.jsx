@@ -21,7 +21,12 @@ export default function StudentSubmissionsList() {
     async function loadSubmissions() {
       try {
         const data = await students.feedbackTracking.list();
-        setSubmissions(mapSubmissionsFromApi(getListItems(data)));
+        console.debug("students.feedbackTracking.list response:", data);
+        const items = getListItems(data);
+        console.debug("unwrapped list items:", items);
+        const mapped = mapSubmissionsFromApi(items);
+        console.debug("mapped submissions:", mapped);
+        setSubmissions(mapped);
       } catch (error) {
         console.error("Failed to load submissions:", error);
         setSubmissions([]);

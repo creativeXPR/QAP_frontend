@@ -63,8 +63,7 @@ export default function SignUp() {
           University of Ibadan Directorate of Quality Assurance
         </h1>
         <p className="text-blue-100 text-sm max-w-xs">
-          Streamlining institutional quality management and continuous
-          improvement at the University of Ibadan
+          Doing the right thing right, everytime.
         </p>
       </div>
 

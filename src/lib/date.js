@@ -1,8 +1,6 @@
 export function getDateParts(dateInput, displayFormat = "text") {
   const date = new Date();
 
-  console.log("Input Date:", dateInput);
-
   if (Number.isNaN(date.getTime())) {
     return ["", "", ""];
   }
