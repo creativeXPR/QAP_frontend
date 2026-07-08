@@ -14,9 +14,10 @@ import ProfileLanding from "./pages/ProfileLanding";
 import UserProfile from "./pages/UserProfile";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
+import StudentSubmissionsList from "./pages/student/StudentSubmissionsList";
 import StudentReportWizard from "./pages/student/StudentReportWizard";
 import StudentNotifications from "./pages/student/StudentNotifications";
-import StudentSubmissionsList from "./pages/student/StudentSubmissionsList";
+import StudentProfile from "./pages/student/StudentProfile";
 
 function App() {
   return (
@@ -82,7 +83,7 @@ function App() {
           path="/student/reports"
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentReportWizard />
+              <StudentSubmissionsList />
             </ProtectedRoute>
           }
         />
@@ -90,7 +91,7 @@ function App() {
           path="/student/reports/new"
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentSubmissionsList />
+              <StudentReportWizard />
             </ProtectedRoute>
           }
         />
@@ -98,7 +99,7 @@ function App() {
           path="/student/report/new"
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentSubmissionsList />
+              <StudentReportWizard />
             </ProtectedRoute>
           }
         />
@@ -107,6 +108,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
               <StudentNotifications />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/profile"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+              <StudentProfile />
             </ProtectedRoute>
           }
         />

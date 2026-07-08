@@ -12,7 +12,7 @@ import { buildSubmissionRequestBody } from "../../lib/feedback";
 import { students } from "../../api/services";
 import { getStoredAccessToken } from "../../lib/auth";
 
-// Lives at /student/reports — the "New Submission" tab.
+// Lives at /student/reports/new, the "New Submission" tab.
 // Steps: 0 = type, 1 = details, 2 = privacy mode, 3 = attachments,
 // 4 = review & submit. The dot indicator groups details+privacy+
 // attachments+review under the same last dot per the design.
@@ -63,7 +63,7 @@ export default function StudentReportWizard() {
     const payload = buildSubmissionRequestBody(form, files);
 
     if (!getStoredAccessToken()) {
-      console.error("No access token found. Please sign in again.");
+      navigate("/sign-in");
       return;
     }
 

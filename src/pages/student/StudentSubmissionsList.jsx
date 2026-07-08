@@ -16,20 +16,19 @@ export default function StudentSubmissionsList() {
   const [type, setType] = useState("All Types");
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadSubmissions() {
       try {
         const data = await students.feedbackTracking.list();
-        console.debug("students.feedbackTracking.list response:", data);
         const items = getListItems(data);
-        console.debug("unwrapped list items:", items);
         const mapped = mapSubmissionsFromApi(items);
-        console.debug("mapped submissions:", mapped);
         setSubmissions(mapped);
+        setError("");
       } catch (error) {
-        console.error("Failed to load submissions:", error);
         setSubmissions([]);
+        setError(error?.message || "Unable to load submissions.");
       } finally {
         setLoading(false);
       }
@@ -120,6 +119,8 @@ export default function StudentSubmissionsList() {
         <div className="space-y-3">
           {loading ? (
             <p className="text-sm text-gray-500">Loading submissions...</p>
+          ) : error ? (
+            <p className="text-sm text-red-600">{error}</p>
           ) : filteredSubmissions.length === 0 ? (
             <p className="text-sm text-gray-500">No submissions found.</p>
           ) : (
