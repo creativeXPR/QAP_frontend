@@ -14,7 +14,6 @@ import ProfileLanding from "./pages/ProfileLanding";
 import UserProfile from "./pages/UserProfile";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
-import SubmitReport from "./pages/student/SubmitReport";
 import StudentReportWizard from "./pages/student/StudentReportWizard";
 import StudentNotifications from "./pages/student/StudentNotifications";
 import StudentSubmissionsList from "./pages/student/StudentSubmissionsList";

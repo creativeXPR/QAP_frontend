@@ -1,39 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import StudentLayout from "../../components/student/StudentLayout";
 import { Search, ChevronDown } from "../../lib/icons";
-import { getAuthHeaders } from "../../lib/auth";
+import { getListItems } from "../../api/client";
+import { students } from "../../api/services";
 import { mapSubmissionsFromApi } from "../../lib/submissionMapper";
-
-// Sample data — the design screenshot shows the same single entry
-// repeated 4 times, which reads like placeholder/demo content rather
-// than 4 distinct real submissions. Replicated as shown; swap in real
-// data from the backend once that's wired up.
-const SUBMISSIONS = [
-  {
-    title: "Unnanounced Change of Exam Venue for Phy 101",
-    category: "Academics",
-    id: "UI 2026-QAP-001",
-    status: "In Review",
-  },
-  {
-    title: "Unnanounced Change of Exam Venue for Phy 101",
-    category: "Academics",
-    id: "UI 2026-QAP-001",
-    status: "In Review",
-  },
-  {
-    title: "Unnanounced Change of Exam Venue for Phy 101",
-    category: "Academics",
-    id: "UI 2026-QAP-001",
-    status: "In Review",
-  },
-  {
-    title: "Unnanounced Change of Exam Venue for Phy 101",
-    category: "Academics",
-    id: "UI 2026-QAP-001",
-    status: "In Review",
-  },
-];
 
 const STATUS_STYLES = {
   "In Review": "bg-gray-100 text-gray-500",
@@ -50,23 +20,8 @@ export default function StudentSubmissionsList() {
   useEffect(() => {
     async function loadSubmissions() {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/students/feedback-tracking/`,
-          {
-            headers: getAuthHeaders(),
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to load submissions");
-        }
-
-        const data = await response.json();
-        setSubmissions(
-          mapSubmissionsFromApi(
-            Array.isArray(data) ? data : data.results || [],
-          ),
-        );
+        const data = await students.feedbackTracking.list();
+        setSubmissions(mapSubmissionsFromApi(getListItems(data)));
       } catch (error) {
         console.error("Failed to load submissions:", error);
         setSubmissions([]);

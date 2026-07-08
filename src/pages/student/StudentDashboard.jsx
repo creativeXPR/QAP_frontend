@@ -14,7 +14,8 @@ import {
   ShieldAlert,
   ClipboardList,
 } from "../../lib/icons";
-import { getAuthHeaders } from "../../lib/auth";
+import { getListItems } from "../../api/client";
+import { students } from "../../api/services";
 import { mapSubmissionsFromApi } from "../../lib/submissionMapper";
 
 const CATEGORIES = [
@@ -37,7 +38,6 @@ export default function StudentDashboard() {
     const navigate = useNavigate();
     const [recentReports, setRecentReports] = useState([]);
     const [loading, setLoading] = useState(true);
-    console.log(recentReports);
 
   const stats = [
     { label: "Total Submissions", value: recentReports.length, icon: BarChart2 },
@@ -49,7 +49,7 @@ export default function StudentDashboard() {
     },
     {
       label: "In Review",
-      value: recentReports.filter((item) => item.rawStatus === "in review").length,
+      value: recentReports.filter((item) => item.rawStatus === "under_review").length,
       icon: Hourglass,
       iconBg: "bg-amber-50 text-amber-600",
     },
@@ -64,19 +64,8 @@ export default function StudentDashboard() {
   useEffect(() => {
     async function loadRecentReports() {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/students/feedback-tracking/`,
-          {
-            headers: getAuthHeaders(),
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to load recent reports");
-        }
-
-        const data = await response.json();
-        const payload = Array.isArray(data) ? data : data.results || [];
+        const data = await students.feedbackTracking.list();
+        const payload = getListItems(data);
         setRecentReports(mapSubmissionsFromApi(payload).slice(0, 3));
       } catch (error) {
         console.error("Failed to load recent reports:", error);

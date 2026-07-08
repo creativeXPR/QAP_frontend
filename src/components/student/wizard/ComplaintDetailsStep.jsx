@@ -28,7 +28,7 @@ export default function ComplaintDetailsStep({
           setFaculties(facultyList);
           setDepartments(departmentList);
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
           setLoadError("Couldn't load faculties/departments. Check your connection.");
         }

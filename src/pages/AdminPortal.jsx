@@ -9,7 +9,6 @@ import {
   FileText,
   UploadCloud,
   Trash2,
-  CheckCircle2,
   Headphones,
 } from "../lib/icons";
 
@@ -17,23 +16,6 @@ import {
 // yet (status requests, updates tables, user actions log, support
 // issues); placeholders matching the reference's Firestore-driven
 // content until real endpoints exist. =====
-
-const STATUS_REQUESTS = [
-  {
-    id: 1,
-    username: "Dr. Ngozi Okafor",
-    station: "Academic Planning Unit",
-    justification: "Requesting Principal Officer access to review departmental KPIs directly.",
-    date: "2026-07-01",
-  },
-  {
-    id: 2,
-    username: "Mr. Tunde Babatunde",
-    station: "Registry",
-    justification: "Need PO-level access to manage administrative submission reports.",
-    date: "2026-06-28",
-  },
-];
 
 const FORM_LOGS_COLUMNS = [
   { key: "title", label: "Form Title" },
