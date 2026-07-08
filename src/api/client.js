@@ -132,7 +132,7 @@ export function getAuthHeaders(includeJson = true) {
     });
   } else {
     console.warn("[Auth] NO TOKEN FOUND - checking all storage keys:", {
-      access_token_length: (localStorage.getItem("access_token") || "").length,
+      access_token_length: (localStorage.getItem("access") || "").length,
       token_length: (localStorage.getItem("token") || "").length,
       jwt_length: (localStorage.getItem("jwt") || "").length,
       accessToken_length: (localStorage.getItem("accessToken") || "").length,

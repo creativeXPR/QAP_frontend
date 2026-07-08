@@ -66,9 +66,9 @@ export default function NotFound() {
           />
         </div>
 
-        <p className="text-xl sm:text-2xl font-bold tracking-widest text-brand mb-3">
+        {/* <p className="text-xl sm:text-2xl font-bold tracking-widest text-brand mb-3">
           PAGE NOT FOUND
-        </p>
+        </p> */}
         <p className="text-sm text-gray-500 max-w-sm">
           The page you're looking for doesn't exist or may have been moved.
         </p>
