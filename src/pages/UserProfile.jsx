@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import LogoutModal from "../components/common/LogoutModal";
-import { Briefcase, Building2, Mail, ShieldCheck, LogOut } from "lucide-react";
+import { Briefcase, Building2, Mail, ShieldCheck, LogOut } from "../lib/icons";
 
 const USER = {
   name: "Dr. Adewale Olumide Johnson",
@@ -65,7 +65,7 @@ export default function UserProfile() {
 
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="flex items-center gap-2 text-sm font-medium text-red-500 border border-red-200 hover:bg-red-50 px-4 py-2 rounded-md shrink-0"
+              className="flex items-center gap-2 text-base font-medium text-red-500 border border-red-200 hover:bg-red-50 px-4 py-2 rounded-[10px] shrink-0"
             >
               <LogOut size={15} />
               Logout

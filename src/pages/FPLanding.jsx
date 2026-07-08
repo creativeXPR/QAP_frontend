@@ -74,10 +74,10 @@ export default function FPLanding() {
           status, and meet deadlines with ease.
         </p>
         <div className="flex items-center justify-center gap-3">
-          <button className="bg-brand hover:bg-brand-dark text-white text-sm font-medium px-5 py-2.5 rounded-md">
+          <button className="bg-brand hover:bg-brand-dark text-white text-base font-medium px-5 py-2.5 rounded-[10px]">
             Start Submission
           </button>
-          <button className="border border-gray-300 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-md hover:bg-gray-50">
+          <button className="border border-gray-300 text-gray-700 text-base font-medium px-5 py-2.5 rounded-[10px] hover:bg-gray-50">
             View My Profile
           </button>
         </div>

@@ -1,78 +1,189 @@
 import { useState } from "react";
-import AdminTopNav from "../components/layout/AdminTopNav";
-import Footer from "../components/layout/Footer";
+import POTopNav from "../components/layout/POTopNav";
+import AdminFooter from "../components/layout/AdminFooter";
 import StatCard from "../components/dashboard/StatCard";
-import DataTable from "../components/dashboard/DataTable";
-import BarChartCard from "../components/dashboard/BarChartCard";
-import LineChartCard from "../components/dashboard/LineChartCard";
-import { FileText, TrendingUp, TrendingDown, Minus, RefreshCcw, Search } from "lucide-react";
+import {
+  Search,
+  ChevronDown,
+  FileText,
+  Clock3,
+  Bell,
+  BarChart2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  BookOpen,
+  Briefcase,
+} from "../lib/icons";
 
-const KEY_STATS = [
-  { label: "Total Submissions", value: "1,247", trend: "+8% this month", icon: FileText },
-  { label: "Completion Rate", value: "87.3%", trend: "+3.5% this month", icon: TrendingUp },
-  { label: "Recent Updates", value: "1,247", trend: "+12.1% this month", icon: RefreshCcw },
+// Sample data — no backend wiring for Updates/KPIs yet, matching the
+// reference prototype's Firestore-driven cards but with placeholder
+// content for now.
+const UPDATES = [
+  {
+    type: "Academic",
+    title: "New Curriculum Review Guidelines",
+    tag: "Announcement",
+    dueDate: "20/7/2026",
+    links: [{ title: "View Document", url: "#" }],
+  },
+  {
+    type: "Administrative",
+    title: "Budget Submission Deadline Extended",
+    tag: "Urgent",
+    dueDate: "15/7/2026",
+    links: [{ title: "View Update", url: "#" }],
+  },
 ];
 
-const KPI_STATS = [
-  { label: "Submission Completion Rate", value: "1,247", trend: "vs previous period", icon: FileText },
-  { label: "Economic Productivity Score", value: "4,2/5.0", trend: "vs previous period", icon: TrendingUp },
-  { label: "Administrative Service Rating", value: "3,8/5.0", trend: "vs previous period", icon: TrendingUp },
-  { label: "Infrastructure Growth", value: "22.1%", trend: "+4.1%", icon: TrendingUp },
+const KPIS = [
+  {
+    title: "Overall Completion Rate",
+    category: "Academic",
+    status: "Improving",
+    value: "87.3%",
+    changePercent: "+5.2%",
+    changePeriod: "vs last month",
+    analysisText:
+      "Completion rates across academic departments have trended upward this quarter, driven by improved submission reminders.",
+  },
+  {
+    title: "Administrative Turnaround Time",
+    category: "Administrative",
+    status: "Stable",
+    value: "3.2 days",
+    changePercent: "+0.1%",
+    changePeriod: "vs last month",
+    analysisText:
+      "Average processing time for administrative requests has held steady, within the target range for this cycle.",
+  },
+  {
+    title: "Infrastructure Maintenance Requests",
+    category: "Infrastructure",
+    status: "Declining",
+    value: "142",
+    changePercent: "-3.4%",
+    changePeriod: "vs last month",
+    analysisText:
+      "Open maintenance requests have decreased slightly, though response times in some faculties still need attention.",
+  },
 ];
 
-const SUBMISSIONS_BY_FACULTY = [
-  { name: "Technology", total: 220, completed: 180, pending: 40 },
-  { name: "Education", total: 190, completed: 150, pending: 40 },
-  { name: "The Social Sciences", total: 200, completed: 160, pending: 40 },
-  { name: "Clinical Sciences", total: 210, completed: 170, pending: 40 },
-  { name: "College of Medicine", total: 230, completed: 190, pending: 40 },
-  { name: "Science", total: 205, completed: 165, pending: 40 },
-];
+const TYPE_ICON = {
+  Academic: BookOpen,
+  Administrative: Briefcase,
+};
 
-const DEPT_PERFORMANCE_COLUMNS = [
-  { key: "dept", label: "Department / Unit" },
-  { key: "submissions", label: "Submissions" },
-  { key: "completionRate", label: "Completion Rate" },
-  { key: "statusTrend", label: "Status & Trend" },
-];
+const STATUS_STYLES = {
+  Improving: { icon: TrendingUp, className: "text-emerald-600 bg-emerald-50" },
+  Stable: { icon: Minus, className: "text-amber-600 bg-amber-50" },
+  Declining: { icon: TrendingDown, className: "text-red-500 bg-red-50" },
+};
 
-const DEPT_PERFORMANCE_ROWS = [
-  { dept: "College of Medicine", submissions: 187, completionRate: 92.1, trend: "+5.2%", status: "Improving" },
-  { dept: "Faculty of Engineering", submissions: 156, completionRate: 89, trend: "+3.1%", status: "Improving" },
-  { dept: "Faculty of Science", submissions: 132, completionRate: 84.2, trend: "+6.5%", status: "Stable" },
-  { dept: "Faculty of Arts", submissions: 187, completionRate: 85.2, trend: "+4.1%", status: "Improving" },
-  { dept: "Faculty of The Social Sciences", submissions: 183, completionRate: 87.2, trend: "+6.3%", status: "Improving" },
-  { dept: "Faculty of Law", submissions: 147, completionRate: 90.2, trend: "+4.3%", status: "Improving" },
-  { dept: "Faculty of Education", submissions: 137, completionRate: 83.2, trend: "+4.3%", status: "Stable" },
-  { dept: "Faculty of Clinical Sciences", submissions: 127, completionRate: 81.2, trend: "-1.3%", status: "Declining" },
-];
+function UpdateCard({ update }) {
+  const Icon = TYPE_ICON[update.type] || FileText;
+  return (
+    <div className="border border-gray-100 rounded-lg p-4 bg-white">
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-brand/5 px-2 py-1 rounded-full mb-3">
+        <Icon size={13} />
+        {update.type}
+      </span>
+      <h3 className="text-sm font-semibold text-gray-900 mb-2">{update.title}</h3>
+      <span className="inline-block text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mb-2">
+        {update.tag}
+      </span>
+      <p className="text-xs text-gray-400 mb-3">Due: {update.dueDate}</p>
+      {update.links.map((link) => (
+        <a
+          key={link.title}
+          href={link.url}
+          className="block text-center text-base font-medium bg-brand hover:bg-brand-dark text-white py-2 rounded-[10px]"
+        >
+          {link.title}
+        </a>
+      ))}
+    </div>
+  );
+}
 
-const TREND_DATA = [
-  { month: "Jan", academic: 65, administrative: 55, infrastructure: 40, overall: 60 },
-  { month: "Feb", academic: 68, administrative: 58, infrastructure: 42, overall: 62 },
-  { month: "Mar", academic: 72, administrative: 60, infrastructure: 45, overall: 65 },
-  { month: "Apr", academic: 75, administrative: 63, infrastructure: 48, overall: 68 },
-  { month: "May", academic: 80, administrative: 68, infrastructure: 50, overall: 72 },
-  { month: "Jun", academic: 84, administrative: 72, infrastructure: 55, overall: 76 },
-];
+function KPICard({ kpi }) {
+  const [open, setOpen] = useState(false);
+  const { icon: StatusIcon, className: statusClass } =
+    STATUS_STYLES[kpi.status] || STATUS_STYLES.Stable;
 
-const TREND_SUMMARY = [
-  { label: "Total Academic Growth", value: "+6.7%", bg: "bg-blue-50" },
-  { label: "Overall Academic Growth", value: "+6.5%", bg: "bg-emerald-50" },
-  { label: "Infrastructure Growth", value: "+3.7%", bg: "bg-amber-50" },
-];
+  return (
+    <div className="border border-gray-100 rounded-lg bg-white mb-3 overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 p-4 text-left"
+      >
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">{kpi.title}</h3>
+          <p className="text-xs text-gray-400 mt-0.5">{kpi.category}</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${statusClass}`}
+          >
+            <StatusIcon size={12} />
+            {kpi.status}
+          </span>
+          <ChevronDown
+            size={16}
+            className={`text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+          <div className="flex items-baseline gap-2 mb-2">
+            <span className="text-2xl font-semibold text-brand">{kpi.value}</span>
+            <span className="text-xs text-gray-400">
+              {kpi.changePercent} ({kpi.changePeriod})
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 leading-relaxed">{kpi.analysisText}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CollapsibleSection({ icon: Icon, title, subtitle, children }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 border border-gray-100 rounded-lg px-4 py-3 bg-white sticky top-0 z-10"
+      >
+        <div className="text-left">
+          <h2 className="flex items-center gap-2 text-brand font-semibold text-base">
+            <Icon size={16} />
+            {title}
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+        </div>
+        <ChevronDown
+          size={18}
+          className={`text-gray-400 transition-transform shrink-0 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && <div className="mt-4">{children}</div>}
+    </section>
+  );
+}
 
 export default function PODashboard() {
-  const [category, setCategory] = useState("All Categories");
-  const [department, setDepartment] = useState("All Departments/Units");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [status, setStatus] = useState("all");
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <AdminTopNav
-        tabs={["Analyze Data", "Profile"]}
-        activeTab=""
-        portalLabel="Principal Officer"
-      />
+      <POTopNav />
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-8">
         <div>
@@ -80,183 +191,105 @@ export default function PODashboard() {
             Principal Officer Dashboard
           </h1>
           <p className="text-xs text-gray-400">
-            Quality assurance performance overview for your faculties
+            Quality Assurance Performance Overview
           </p>
         </div>
 
-        {/* Top summary stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {KEY_STATS.map((s) => (
-            <StatCard key={s.label} {...s} />
-          ))}
+        {/* Overview stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <StatCard icon={FileText} label="Total KPIs" value="24" />
+          <StatCard icon={Clock3} label="Total PMP Updates" value="8" />
         </div>
-
-        {/* Key performance indicators */}
-        <section>
-          <h2 className="text-sm font-semibold text-gray-900 mb-3">
-            Key Performance Indicators
-          </h2>
-          <p className="text-xs text-gray-400 mb-3 -mt-2">
-            Quality assurance performance metrics based on your role
-          </p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {KPI_STATS.map((s) => (
-              <StatCard key={s.label} {...s} variant="overview" />
-            ))}
-          </div>
-        </section>
 
         {/* Filters */}
         <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
-          <p className="text-sm font-semibold text-gray-900 mb-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
+            <Search size={14} />
             Data Filters & Controls
+          </h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Search and filter KPIs by title, category and status
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-2">
-              <Search size={14} className="text-gray-400" />
-              <input
-                placeholder="Search keywords..."
-                className="text-sm w-full outline-none placeholder-gray-400"
-              />
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <p className="text-xs text-gray-400 mb-1.5">Search Keywords</p>
+              <div className="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-2">
+                <Search size={14} className="text-gray-400" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search KPI title..."
+                  className="text-sm w-full outline-none placeholder-gray-400"
+                />
+              </div>
             </div>
-            <select className="border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-500">
-              <option>QA Signs</option>
-            </select>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-500"
-            >
-              <option>All Categories</option>
-              <option>Academic</option>
-              <option>Administrative</option>
-            </select>
-            <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              className="border border-brand rounded-md px-3 py-2 text-sm text-gray-700"
-            >
-              <option>All Departments/Units</option>
-              <option>College of Medicine</option>
-              <option>Faculty of Engineering</option>
-            </select>
+
+            <div>
+              <p className="text-xs text-gray-400 mb-1.5">Category Filter</p>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600"
+              >
+                <option value="all">All Categories</option>
+                <option value="academic">Academic</option>
+                <option value="administrative">Administrative</option>
+                <option value="infrastructure">Infrastructure</option>
+              </select>
+            </div>
+
+            <div>
+              <p className="text-xs text-gray-400 mb-1.5">Status Filter</p>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600"
+              >
+                <option value="all">All Status</option>
+                <option value="improving">Improving</option>
+                <option value="stable">Stable</option>
+                <option value="declining">Declining</option>
+              </select>
+            </div>
           </div>
-          <div className="flex gap-3 mt-3">
-            <button className="text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-md hover:bg-gray-50">
+
+          <div className="flex gap-3 mt-4">
+            <button className="text-base text-brand border border-gray-200 px-4 py-2 rounded-[10px] hover:bg-gray-50">
               Reset Filters
             </button>
-            <button className="text-sm text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-md">
+            <button className="text-base text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-[10px]">
               Apply Filters
             </button>
           </div>
         </section>
 
-        {/* Bar chart */}
-        <BarChartCard
-          title="Submissions by Faculties"
-          subtitle="Distribution of quality assurance submissions across departments"
-          data={SUBMISSIONS_BY_FACULTY}
-        />
-
-        {/* Department performance table */}
-        <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
-          <p className="text-sm font-semibold text-gray-900 mb-1">
-            Departmental Performance Summary
-          </p>
-          <p className="text-xs text-gray-400 mb-4">
-            Detailed breakdown of submission statistics and completion rates
-          </p>
-
-          <DataTable
-            columns={DEPT_PERFORMANCE_COLUMNS}
-            rows={DEPT_PERFORMANCE_ROWS.map((r) => {
-              const barColor =
-                r.completionRate >= 90
-                  ? "bg-emerald-500"
-                  : r.completionRate >= 85
-                  ? "bg-blue-600"
-                  : "bg-amber-500";
-
-              const STATUS_STYLES = {
-                Improving: {
-                  Icon: TrendingUp,
-                  className: "text-emerald-600 border-emerald-200 bg-emerald-50",
-                },
-                Stable: {
-                  Icon: Minus,
-                  className: "text-amber-600 border-amber-200 bg-amber-50",
-                },
-                Declining: {
-                  Icon: TrendingDown,
-                  className: "text-red-500 border-red-200 bg-red-50",
-                },
-              };
-              const { Icon: StatusIcon, className: statusClass } =
-                STATUS_STYLES[r.status] || STATUS_STYLES.Stable;
-
-              return {
-                ...r,
-                completionRate: (
-                  <div className="min-w-[110px]">
-                    <p className="text-sm text-gray-700 mb-1">
-                      {r.completionRate}%
-                    </p>
-                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${barColor}`}
-                        style={{ width: `${r.completionRate}%` }}
-                      />
-                    </div>
-                  </div>
-                ),
-                statusTrend: (
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${statusClass}`}
-                    >
-                      <StatusIcon size={12} />
-                      {r.status}
-                    </span>
-                    <span
-                      className={
-                        r.status === "Declining"
-                          ? "text-red-500 text-sm"
-                          : "text-emerald-600 text-sm"
-                      }
-                    >
-                      {r.trend}
-                    </span>
-                  </div>
-                ),
-              };
-            })}
-          />
-
-          <div className="flex items-center justify-between mt-4 text-sm">
-            <p className="text-gray-400">
-              Showing {DEPT_PERFORMANCE_ROWS.length} Departments
-            </p>
-            <div className="flex gap-2">
-              <button className="border border-gray-200 text-gray-500 px-4 py-1.5 rounded-md hover:bg-gray-50">
-                Previous
-              </button>
-              <button className="border border-gray-200 text-gray-500 px-4 py-1.5 rounded-md hover:bg-gray-50">
-                Next
-              </button>
-            </div>
+        {/* Updates (collapsible) */}
+        <CollapsibleSection
+          icon={Bell}
+          title="Updates"
+          subtitle="Principal updates with expandable cards for better readability"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {UPDATES.map((update) => (
+              <UpdateCard key={update.title} update={update} />
+            ))}
           </div>
-        </section>
+        </CollapsibleSection>
 
-        {/* Performance trend line chart */}
-        <LineChartCard
-          title="Performance Trend Analysis"
-          subtitle="Quality assurance metrics over time by category"
-          data={TREND_DATA}
-          summary={TREND_SUMMARY}
-        />
+        {/* KPIs (collapsible, each card independently collapsible) */}
+        <CollapsibleSection
+          icon={BarChart2}
+          title="KPIs"
+          subtitle="KPI cards with expandable descriptions and charts"
+        >
+          {KPIS.map((kpi) => (
+            <KPICard key={kpi.title} kpi={kpi} />
+          ))}
+        </CollapsibleSection>
       </main>
 
-      <Footer />
+      <AdminFooter />
     </div>
   );
 }

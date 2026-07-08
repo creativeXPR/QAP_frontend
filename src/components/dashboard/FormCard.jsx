@@ -1,4 +1,4 @@
-import { BookOpen, Calendar } from "lucide-react";
+import { BookOpen, Calendar } from "../../lib/icons";
 
 // Status is shown as a pill below the title.
 // New/Completed are solid-filled; Pending uses a dot + muted background.
@@ -64,7 +64,7 @@ export default function FormCard({
       )}
 
       <button
-        className={`mt-auto text-sm font-medium py-2 rounded-md transition-colors ${
+        className={`mt-auto text-base font-medium py-2 rounded-[10px] transition-colors ${
           isDone
             ? "bg-gray-100 text-gray-500 hover:bg-gray-200"
             : action === "Continue"

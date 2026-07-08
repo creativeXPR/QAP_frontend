@@ -19,6 +19,46 @@ export const ROLE_HOME_ROUTES = {
   [ROLES.ADMIN]: "/admin",
 };
 
+function extractToken(data) {
+  return (
+    data?.access ||
+    data?.token ||
+    data?.jwt ||
+    data?.accessToken ||
+    data?.access_token ||
+    data?.key ||
+    null
+  );
+}
+
+function extractAuthType(data) {
+  const rawType =
+    data?.token_type || data?.auth_type || data?.tokenType || "Bearer";
+  return String(rawType).charAt(0).toUpperCase() + String(rawType).slice(1);
+}
+
+export function getStoredAccessToken() {
+  return (
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("jwt") ||
+    localStorage.getItem("accessToken") ||
+    ""
+  );
+}
+
+export function getAuthHeaders(includeJson = true) {
+  const headers = includeJson ? { "Content-Type": "application/json" } : {};
+  const token = getStoredAccessToken();
+
+  if (token) {
+    const authType = localStorage.getItem("auth_type") || "Bearer";
+    headers.Authorization = `${authType} ${token}`;
+  }
+
+  return headers;
+}
+
 /**
  * Pulls the role out of a login/register response.
  * NOTE: your auth-doc.md doesn't show exactly where this field lives in
@@ -53,7 +93,11 @@ export async function loginUser(identifier, password) {
     throw new Error(data?.error || "Invalid credentials");
   }
 
-  if (data?.access) localStorage.setItem("access_token", data.access);
+  const token = extractToken(data);
+  if (token) {
+    localStorage.setItem("access_token", token);
+    localStorage.setItem("auth_type", extractAuthType(data));
+  }
   if (data?.refresh) localStorage.setItem("refresh_token", data.refresh);
   if (data?.user_id) localStorage.setItem("user_id", data.user_id);
   if (data?.user) localStorage.setItem("user", JSON.stringify(data.user));
@@ -104,7 +148,9 @@ export async function registerUser({
       } else {
         message = Object.entries(data)
           .map(([key, value]) =>
-            Array.isArray(value) ? `${key}: ${value.join(" ")}` : `${key}: ${value}`
+            Array.isArray(value)
+              ? `${key}: ${value.join(" ")}`
+              : `${key}: ${value}`,
           )
           .join(" | ");
       }
@@ -112,7 +158,11 @@ export async function registerUser({
     throw new Error(message);
   }
 
-  if (data?.access) localStorage.setItem("access_token", data.access);
+  const token = extractToken(data);
+  if (token) {
+    localStorage.setItem("access_token", token);
+    localStorage.setItem("auth_type", extractAuthType(data));
+  }
   if (data?.refresh) localStorage.setItem("refresh_token", data.refresh);
   if (data?.user_id) localStorage.setItem("user_id", data.user_id);
   if (data?.user) localStorage.setItem("user", JSON.stringify(data.user));
@@ -131,6 +181,7 @@ export function logout() {
   localStorage.removeItem("user_id");
   localStorage.removeItem("user");
   localStorage.removeItem("user_role");
+  localStorage.removeItem("auth_type");
 }
 
 export function isAuthenticated() {

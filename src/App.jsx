@@ -15,8 +15,9 @@ import UserProfile from "./pages/UserProfile";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
 import SubmitReport from "./pages/student/SubmitReport";
-import StudentReportsList from "./pages/student/StudentReportsList";
+import StudentReportWizard from "./pages/student/StudentReportWizard";
 import StudentNotifications from "./pages/student/StudentNotifications";
+import StudentSubmissionsList from "./pages/student/StudentSubmissionsList";
 
 function App() {
   return (
@@ -82,7 +83,7 @@ function App() {
           path="/student/reports"
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentReportsList />
+              <StudentReportWizard />
             </ProtectedRoute>
           }
         />
@@ -90,7 +91,15 @@ function App() {
           path="/student/reports/new"
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <SubmitReport />
+              <StudentSubmissionsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/report/new"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+              <StudentSubmissionsList />
             </ProtectedRoute>
           }
         />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut } from "../../lib/icons";
 import LogoutModal from "../common/LogoutModal";
 
 const NAV_LINKS = ["Home", "About", "Mission", "Unit", "Contact"];
@@ -17,8 +17,8 @@ export default function Navbar({
 
   const ctaClassName =
     ctaVariant === "outline"
-      ? "border border-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-md hover:bg-gray-50"
-      : "bg-brand hover:bg-brand-dark text-white text-sm font-medium px-4 py-2 rounded-md";
+      ? "border border-gray-300 text-gray-700 text-base font-medium px-4 py-2 rounded-[10px] hover:bg-gray-50"
+      : "bg-brand hover:bg-brand-dark text-white text-base font-medium px-4 py-2 rounded-[10px]";
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import { Users, CheckCircle2, Heart } from "lucide-react";
+import { Users, CheckCircle2, Heart } from "../lib/icons";
 
 const FEATURES = [
   {
@@ -42,7 +42,7 @@ export default function ProfileLanding() {
         <div className="flex items-center justify-center gap-4">
           <Link
             to="/profile/me"
-            className="bg-brand hover:bg-brand-dark text-white text-sm font-medium px-5 py-2.5 rounded-md"
+            className="bg-brand hover:bg-brand-dark text-white text-base font-medium px-5 py-2.5 rounded-[10px]"
           >
             Access your Profile
           </Link>

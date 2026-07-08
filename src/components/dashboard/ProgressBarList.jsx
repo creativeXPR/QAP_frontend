@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react";
+import { TrendingUp } from "../../lib/icons";
 
 export default function ProgressBarList({
   title,

@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail } from "../../lib/icons";
 
 const COLUMNS = [
   {

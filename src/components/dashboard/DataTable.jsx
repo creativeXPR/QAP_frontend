@@ -1,10 +1,13 @@
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye } from "../../lib/icons";
 
 const BADGE_STYLES = {
   Active: "bg-emerald-50 text-emerald-600",
   Draft: "bg-gray-100 text-gray-500",
   Academic: "bg-blue-50 text-blue-600",
   Administrative: "bg-purple-50 text-purple-600",
+  Infrastructure: "bg-amber-50 text-amber-600",
+  Urgent: "bg-red-50 text-red-500",
+  Announcement: "bg-blue-50 text-blue-600",
   "Edit & Submit": "bg-blue-50 text-blue-600",
   "View Only": "bg-gray-100 text-gray-500",
   "Academic View": "bg-blue-50 text-blue-600",

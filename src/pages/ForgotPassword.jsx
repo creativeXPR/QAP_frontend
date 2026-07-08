@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft, Mail } from "../lib/icons";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -82,7 +82,7 @@ export default function ForgotPassword() {
 
                 <button
                   type="submit"
-                  className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-md transition-colors"
+                  className="w-full bg-brand hover:bg-brand-dark text-white font-medium py-2.5 rounded-[10px] transition-colors"
                 >
                   Send Reset Link
                 </button>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "../lib/icons";
 import { registerUser } from "../lib/auth";
 
 const STATUS_OPTIONS = [
@@ -199,7 +199,7 @@ export default function SignUp() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand hover:bg-brand-dark disabled:opacity-60 text-white font-medium py-2.5 rounded-md transition-colors"
+              className="w-full bg-brand hover:bg-brand-dark disabled:opacity-60 text-white font-medium py-2.5 rounded-[10px] transition-colors"
             >
               {loading ? "Creating account..." : "Create Account"}
             </button>

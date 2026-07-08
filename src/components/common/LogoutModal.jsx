@@ -1,4 +1,4 @@
-import { LogOut } from "lucide-react";
+import { LogOut } from "../../lib/icons";
 
 /**
  * Reusable confirm-logout dialog.
@@ -33,13 +33,13 @@ export default function LogoutModal({ open, onCancel, onConfirm }) {
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-md py-2.5 hover:bg-gray-50"
+            className="flex-1 text-base font-medium text-gray-700 border border-gray-300 rounded-[10px] py-2.5 hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md py-2.5"
+            className="flex-1 text-base font-medium text-white bg-red-500 hover:bg-red-600 rounded-[10px] py-2.5"
           >
             Logout
           </button>

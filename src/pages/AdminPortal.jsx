@@ -1,64 +1,66 @@
+import { useState } from "react";
 import AdminTopNav from "../components/layout/AdminTopNav";
 import AdminFooter from "../components/layout/AdminFooter";
 import StatCard from "../components/dashboard/StatCard";
 import DataTable from "../components/dashboard/DataTable";
-import ProgressBarList from "../components/dashboard/ProgressBarList";
 import {
   Users,
+  TrendingUp,
   FileText,
-  Activity,
-  Layers,
   UploadCloud,
   Trash2,
-  TrendingUp,
-  Eye,
-} from "lucide-react";
+  CheckCircle2,
+  Headphones,
+} from "../lib/icons";
 
-const OVERVIEW_STATS = [
-  { label: "Active Users", value: "1,247", icon: Users, trend: "Stable" },
-  { label: "Submission Counts", value: "3,854", icon: FileText, trend: "Stable" },
-  { label: "System Health", value: "Stable", icon: Activity, trend: "Stable" },
-  { label: "Total Forms", value: "142", icon: Layers, trend: "Stable" },
-  { label: "KPI Templates", value: "89", icon: Layers, trend: "Stable" },
+// ===== Sample data — none of these sections have a backend wired up
+// yet (status requests, updates tables, user actions log, support
+// issues); placeholders matching the reference's Firestore-driven
+// content until real endpoints exist. =====
+
+const STATUS_REQUESTS = [
+  {
+    id: 1,
+    username: "Dr. Ngozi Okafor",
+    station: "Academic Planning Unit",
+    justification: "Requesting Principal Officer access to review departmental KPIs directly.",
+    date: "2026-07-01",
+  },
+  {
+    id: 2,
+    username: "Mr. Tunde Babatunde",
+    station: "Registry",
+    justification: "Need PO-level access to manage administrative submission reports.",
+    date: "2026-06-28",
+  },
 ];
 
-const FORM_LIBRARY_COLUMNS = [
+const FORM_LOGS_COLUMNS = [
   { key: "title", label: "Form Title" },
   { key: "category", label: "Category", type: "badge" },
   { key: "status", label: "Status", type: "badge" },
-  { key: "dateUploaded", label: "Date Uploaded" },
+  { key: "dueDate", label: "Due Date" },
   { key: "submissions", label: "Submissions" },
 ];
 
-const FORM_LIBRARY_ROWS = [
-  {
-    title: "Course Evaluation Form",
-    category: "Academic",
-    status: "Active",
-    dateUploaded: "2026-01-15",
-    submissions: 340,
-  },
-  {
-    title: "Faculty Research Output Assessment",
-    category: "Academic",
-    status: "Active",
-    dateUploaded: "2025-07-15",
-    submissions: 127,
-  },
-  {
-    title: "Department Resource Allocation",
-    category: "Administrative",
-    status: "Active",
-    dateUploaded: "2026-01-15",
-    submissions: 68,
-  },
-  {
-    title: "Student Feedback Survey",
-    category: "Academic",
-    status: "Draft",
-    dateUploaded: "2026-01-15",
-    submissions: 0,
-  },
+const FORM_LOGS_ROWS = [
+  { title: "Course Evaluation Form", category: "Academic", status: "Active", dueDate: "2026-01-15", submissions: 340 },
+  { title: "Faculty Research Output Assessment", category: "Academic", status: "Active", dueDate: "2025-07-15", submissions: 127 },
+  { title: "Department Resource Allocation", category: "Administrative", status: "Active", dueDate: "2026-01-15", submissions: 68 },
+  { title: "Student Feedback Survey", category: "Academic", status: "Draft", dueDate: "2026-01-15", submissions: 0 },
+];
+
+const FP_UPDATES_COLUMNS = [
+  { key: "title", label: "Update Title" },
+  { key: "category", label: "Category", type: "badge" },
+  { key: "status", label: "Status", type: "badge" },
+  { key: "dueDate", label: "Due Date" },
+  { key: "dateUpdated", label: "Date Updated" },
+];
+
+const FP_UPDATES_ROWS = [
+  { title: "New Curriculum Review Guidelines", category: "Academic", status: "Active", dueDate: "2026-07-20", dateUpdated: "2026-07-05" },
+  { title: "Exam Venue Change Protocol", category: "Administrative", status: "Draft", dueDate: "2026-07-25", dateUpdated: "2026-07-01" },
 ];
 
 const FP_USER_COLUMNS = [
@@ -69,64 +71,9 @@ const FP_USER_COLUMNS = [
 ];
 
 const FP_USER_ROWS = [
-  {
-    name: "Dr. Adewale Ogunleye",
-    department: "Computer Science",
-    email: "a.ogunleye@ui.edu.ng",
-    permissions: "Edit & Submit",
-  },
-  {
-    name: "Prof. Chinyere Nwosu",
-    department: "Medicine & Surgery",
-    email: "c.nwosu@ui.edu.ng",
-    permissions: "Edit & Submit",
-  },
-  {
-    name: "Dr. Ibrahim Lawal",
-    department: "Chemistry",
-    email: "i.lawal@ui.edu.ng",
-    permissions: "View Only",
-  },
-  {
-    name: "Prof. Folake Adeleke",
-    department: "Political Science",
-    email: "f.adeleke@ui.edu.ng",
-    permissions: "View Only",
-  },
-];
-
-const PO_USER_COLUMNS = [
-  { key: "name", label: "Name" },
-  { key: "office", label: "Office / Unit" },
-  { key: "email", label: "Email" },
-  { key: "accessLevel", label: "Data Access Level", type: "badge" },
-];
-
-const PO_USER_ROWS = [
-  {
-    name: "Prof. Oluwaseun Ajayi",
-    office: "Vice Chancellor's Office",
-    email: "o.ajayi@ui.edu.ng",
-    accessLevel: "University-wide",
-  },
-  {
-    name: "Dr. Ngozi Okafor",
-    office: "Academic Planning Unit",
-    email: "n.okafor@ui.edu.ng",
-    accessLevel: "Academic View",
-  },
-  {
-    name: "Mr. Tunde Babatunde",
-    office: "Registry",
-    email: "t.babatunde@ui.edu.ng",
-    accessLevel: "Administrative View",
-  },
-  {
-    name: "Mrs. Aisha Mohammed",
-    office: "Quality Assurance Unit",
-    email: "a.mohammed@ui.edu.ng",
-    accessLevel: "University-wide",
-  },
+  { name: "Dr. Adewale Ogunleye", department: "Computer Science", email: "a.ogunleye@ui.edu.ng", permissions: "Edit & Submit" },
+  { name: "Prof. Chinyere Nwosu", department: "Medicine & Surgery", email: "c.nwosu@ui.edu.ng", permissions: "Edit & Submit" },
+  { name: "Dr. Ibrahim Lawal", department: "Chemistry", email: "i.lawal@ui.edu.ng", permissions: "View Only" },
 ];
 
 const KPI_LIBRARY_COLUMNS = [
@@ -137,326 +84,429 @@ const KPI_LIBRARY_COLUMNS = [
 ];
 
 const KPI_LIBRARY_ROWS = [
+  { name: "Student Graduation Rate", category: "Academic", status: "Active", lastUploaded: "2026-01-15" },
+  { name: "Budget Utilization Efficiency", category: "Administrative", status: "Active", lastUploaded: "2026-01-15" },
+];
+
+const PO_UPDATES_ROWS = [
+  { name: "Infrastructure Maintenance Backlog", category: "Infrastructure", status: "Active", lastUploaded: "2026-07-02" },
+  { name: "Quarterly Performance Summary", category: "Administrative", status: "Draft", lastUploaded: "2026-06-30" },
+];
+
+const PO_USER_COLUMNS = [
+  { key: "name", label: "Name" },
+  { key: "office", label: "Office / Unit" },
+  { key: "email", label: "Email" },
+  { key: "accessLevel", label: "Data Access Level", type: "badge" },
+];
+
+const PO_USER_ROWS = [
+  { name: "Prof. Oluwaseun Ajayi", office: "Vice Chancellor's Office", email: "o.ajayi@ui.edu.ng", accessLevel: "University-wide" },
+  { name: "Dr. Ngozi Okafor", office: "Academic Planning Unit", email: "n.okafor@ui.edu.ng", accessLevel: "Academic View" },
+];
+
+const USER_ACTIONS = [
+  { name: "Prof. Oluwaseun Ajayi", time: "2026-07-06 14:22:01" },
+  { name: "Dr. Ngozi Okafor", time: "2026-07-06 12:00:00" },
+  { name: "Mr. Tunde Babatunde", time: "2026-07-05 09:15:42" },
+];
+
+const SUPPORT_ISSUES = [
   {
-    name: "Student Graduation Rate",
-    category: "Academic",
-    status: "Active",
-    lastUploaded: "2026-01-15",
+    id: 1,
+    name: "Adaeze Okonkwo",
+    category: "Login/Access Issue",
+    email: "a.okonkwo@stu.ui.edu.ng",
+    date: "05/07/2026",
+    resolved: false,
+    message: "I keep getting an invalid credentials error even though my password is correct.",
   },
   {
-    name: "Budget Utilization Efficiency",
-    category: "Administrative",
-    status: "Active",
-    lastUploaded: "2026-01-15",
-  },
-  {
-    name: "Staff Development Programs",
-    category: "Administrative",
-    status: "Under Review",
-    lastUploaded: "2026-01-15",
+    id: 2,
+    name: "Bello Musa",
+    category: "Form Submission Error",
+    email: "b.musa@stu.ui.edu.ng",
+    date: "03/07/2026",
+    resolved: true,
+    message: "My hostel complaint form failed to submit twice before finally going through.",
   },
 ];
 
-const ACTIVITY_LOG = [
-  {
-    name: "Prof. Oluwaseun Ajayi",
-    action: "Generated Annual Report",
-    time: "2026-01-15 08:24 AM",
-  },
-  {
-    name: "Dr. Ngozi Okafor",
-    action: "Viewed Academic KPI Dashboard",
-    time: "2026-01-15 09:34 AM",
-  },
-  {
-    name: "Mrs. Aisha Mohammed",
-    action: "Exported Compliance Report",
-    time: "2026-01-15 09:34 AM",
-  },
-  {
-    name: "Mr. Tunde Babatunde",
-    action: "Accessed Budget Analysis",
-    time: "2026-01-15 09:34 AM",
-  },
-];
-
-const ANALYTICS_STATS = [
-  {
-    label: "Real-time Visitors",
-    value: "47",
-    caption: "Active now",
-    icon: Activity,
-  },
-  {
-    label: "Active Users Online",
-    value: "128",
-    caption: "Logged in users",
-    icon: Users,
-  },
-  {
-    label: "KPI Viewership",
-    value: "2,847",
-    caption: "views this month",
-    icon: Eye,
-  },
-  {
-    label: "System Performance",
-    value: "98.7%",
-    caption: "Uptime this month",
-    trend: "Healthy",
-    icon: Activity,
-  },
-];
-
-const SUBMISSION_TRACKING = [
-  { label: "Aug", value: 245 },
-  { label: "Sep", value: 345 },
-  { label: "Oct", value: 312 },
-  { label: "Nov", value: 388 },
-  { label: "Dec", value: 423 },
-];
-
-const SYSTEM_METRICS = [
-  {
-    title: "Database Performance",
-    rows: [
-      ["Query Time (avg)", "24ms"],
-      ["Connection Pool", "67%"],
-      ["Cache Hit Rate", "94.2%"],
-    ],
-  },
-  {
-    title: "API Response Times",
-    rows: [
-      ["Forms API", "124ms"],
-      ["KPI API", "156ms"],
-      ["Analytics API", "234ms"],
-    ],
-  },
-  {
-    title: "Storage & Resources",
-    rows: [
-      ["Storage Used", "343 GB"],
-      ["Bandwidth Growth", "187 GB"],
-      ["Memory Usage", "84.2%"],
-    ],
-  },
-];
-
-function SectionHeaderButtons({ uploadLabel, deleteLabel }) {
-  if (!uploadLabel && !deleteLabel) return null;
+function SectionHeaderButtons({ uploadLabel, deleteLabel, deleteHref }) {
   return (
-    <div className="flex gap-3">
-      {uploadLabel && (
-        <button className="flex items-center gap-2 text-sm font-medium bg-brand hover:bg-brand-dark text-white px-5 py-2.5 rounded-lg">
-          <UploadCloud size={15} />
-          {uploadLabel}
-        </button>
-      )}
-      {deleteLabel && (
-        <button className="flex items-center gap-2 text-sm font-medium bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-lg">
-          <Trash2 size={15} />
-          {deleteLabel}
-        </button>
-      )}
+    <div className="flex gap-3 flex-wrap">
+      <button className="flex items-center gap-2 text-base font-medium bg-brand hover:bg-brand-dark text-white px-5 py-2.5 rounded-[10px]">
+        <UploadCloud size={15} />
+        {uploadLabel}
+      </button>
+      <a
+        href={deleteHref}
+        className="flex items-center gap-2 text-base font-medium bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-[10px]"
+      >
+        <Trash2 size={15} />
+        {deleteLabel}
+      </a>
     </div>
   );
 }
 
-function SectionHeader({ title, uploadLabel, deleteLabel }) {
+function SupportIssueCard({ issue }) {
+  const [open, setOpen] = useState(false);
+  const [reply, setReply] = useState("");
+
   return (
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-      <SectionHeaderButtons uploadLabel={uploadLabel} deleteLabel={deleteLabel} />
+    <div className="border border-gray-100 rounded-lg bg-white mb-3 overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 p-4 text-left"
+      >
+        <div>
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <h3 className="text-sm font-semibold text-gray-900">{issue.name}</h3>
+            <span className="text-[11px] font-medium text-brand bg-brand/5 px-2 py-0.5 rounded-full">
+              {issue.category}
+            </span>
+            <span
+              className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                issue.resolved
+                  ? "bg-emerald-50 text-emerald-600"
+                  : "bg-amber-50 text-amber-600"
+              }`}
+            >
+              {issue.resolved ? "Resolved" : "Pending"}
+            </span>
+          </div>
+          <p className="text-xs text-gray-400">
+            {issue.email} · {issue.date}
+          </p>
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+          <p className="text-xs font-semibold text-gray-500 mb-1">Message:</p>
+          <p className="text-sm text-gray-700 mb-4">{issue.message}</p>
+
+          <p className="text-xs font-semibold text-gray-500 mb-1">Admin Reply:</p>
+          <textarea
+            value={reply}
+            onChange={(e) => setReply(e.target.value)}
+            rows={3}
+            placeholder="Write a reply to this user..."
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand resize-none"
+          />
+
+          <div className="flex gap-2 flex-wrap">
+            <button className="text-base font-medium bg-brand hover:bg-brand-dark text-white px-4 py-2 rounded-[10px]">
+              Send Reply
+            </button>
+            <button
+              className={`text-sm font-medium px-4 py-2 rounded-md text-white ${
+                issue.resolved ? "bg-amber-500 hover:bg-amber-600" : "bg-emerald-600 hover:bg-emerald-700"
+              }`}
+            >
+              Mark as {issue.resolved ? "Pending" : "Resolved"}
+            </button>
+            <button className="text-base font-medium border border-gray-200 text-gray-500 px-4 py-2 rounded-[10px] hover:bg-gray-50">
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function AdminPortal() {
+  const totalIssues = SUPPORT_ISSUES.length;
+  const pendingIssues = SUPPORT_ISSUES.filter((i) => !i.resolved).length;
+  const resolvedIssues = SUPPORT_ISSUES.filter((i) => i.resolved).length;
+
   return (
     <div className="bg-gray-50 min-h-screen">
-      <AdminTopNav
-        tabs={["FP Management", "PO Management", "Profile", "System Settings"]}
-        activeTab="FP Management"
-        portalLabel="Admin Portal"
-      />
+      <AdminTopNav />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-10">
         {/* System overview */}
         <section>
           <h2 className="text-base font-semibold text-gray-900 mb-1">
             System Overview
           </h2>
           <p className="text-xs text-gray-400 mb-4">
-            Real-time platform monitoring and statistics
+            Real-time platform monitoring and metrics.
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {OVERVIEW_STATS.map((s) => (
-              <StatCard key={s.label} {...s} variant="overview" />
-            ))}
+
+          <div className="max-w-xs">
+            <StatCard
+              icon={Users}
+              label="Registered Users"
+              value="1,247"
+              trend="Stable"
+              variant="overview"
+            />
           </div>
+
+        {/* Accept column to be featured in future update */}
+          {/* <div className="mt-8">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+              User Status Requests
+            </h3>
+            <div className="space-y-3">
+              {STATUS_REQUESTS.map((req) => (
+                <div
+                  key={req.id}
+                  className="flex items-center justify-between gap-3 border border-gray-100 rounded-lg bg-white p-4 flex-wrap"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{req.username}</p>
+                    <p className="text-xs text-gray-400 truncate max-w-md">
+                      {req.station} — {req.justification}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs text-gray-400">{req.date}</span>
+                    <span className="text-[11px] font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+                      principal
+                    </span>
+                    <button className="flex items-center gap-1 text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md">
+                      <CheckCircle2 size={13} />
+                      Accept
+                    </button>
+                    <button className="text-gray-400 hover:text-red-500" aria-label="Delete">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div> */}
         </section>
 
         {/* FP Management */}
-        <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <section id="fpm">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div>
               <h2 className="text-base font-semibold text-gray-900">
                 FP Management
               </h2>
               <p className="text-xs text-gray-400">
-                Manage Focal Person forms and user accounts
+                Manage Focal Persons forms and user accounts.
               </p>
             </div>
             <SectionHeaderButtons
-              uploadLabel="Upload New Forms/Templates"
+              uploadLabel="Upload New Forms/Updates"
               deleteLabel="Delete"
+              deleteHref="#fp-entry-logs"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="max-w-xs mb-6">
             <StatCard
               icon={TrendingUp}
               label="Submission Rates"
               value="87.3%"
-              caption="Average completion rate across all forms"
-            />
-            <StatCard
-              icon={TrendingUp}
-              label="Completion Statistics"
-              value="558 / 640"
-              caption="Forms completed this month"
+              caption="Average completion rates across all forms"
             />
           </div>
 
-          <SectionHeader title="Form Library" />
-          <div className="mb-6">
-            <DataTable
-              columns={FORM_LIBRARY_COLUMNS}
-              rows={FORM_LIBRARY_ROWS}
-              actions={["view", "edit", "delete"]}
-            />
+          <div id="fp-entry-logs" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Form Logs</h3>
+              <DataTable
+                columns={FORM_LOGS_COLUMNS}
+                rows={FORM_LOGS_ROWS}
+                actions={["view", "delete"]}
+              />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">Updates</h3>
+              <DataTable
+                columns={FP_UPDATES_COLUMNS}
+                rows={FP_UPDATES_ROWS}
+                actions={["view", "delete"]}
+              />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                FP User Management
+              </h3>
+              <DataTable
+                columns={FP_USER_COLUMNS}
+                rows={FP_USER_ROWS}
+                actions={["view", "edit", "delete"]}
+              />
+            </div>
           </div>
-
-          <SectionHeader title="FP User Management" />
-          <DataTable
-            columns={FP_USER_COLUMNS}
-            rows={FP_USER_ROWS}
-            actions={["view", "edit", "delete"]}
-          />
         </section>
 
-        {/* PO Management */}
-        <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        {/* User Infrastructure (PO Management) */}
+        <section id="pom">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">
-                PO Management
-              </h2>
-              <p className="text-xs text-gray-400">
-                Manage Principal Officer templates and user accounts
-              </p>
-            </div>
+            <h2 className="text-base font-semibold text-gray-900">
+              User Infrastructure
+            </h2>
             <SectionHeaderButtons
-              uploadLabel="Upload New KPI Templates"
+              uploadLabel="Upload New KPI Templates/Updates"
               deleteLabel="Delete"
+              deleteHref="#kpi-library"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="max-w-xs mb-6">
             <StatCard
               icon={FileText}
               label="Report Generation Count"
               value="284"
-              caption="Reports generated this month"
-            />
-            <StatCard
-              icon={TrendingUp}
-              label="Completion Statistics"
-              value="1,432"
-              caption="Access records recorded this month"
+              caption="Total KPIs + updates uploaded"
             />
           </div>
 
-          <SectionHeader title="KPI Library" />
-          <div className="mb-6">
-            <DataTable
-              columns={KPI_LIBRARY_COLUMNS}
-              rows={KPI_LIBRARY_ROWS}
-              actions={["view", "edit", "delete"]}
-            />
+          <div id="kpi-library" className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">KPI Library</h3>
+              <DataTable
+                columns={KPI_LIBRARY_COLUMNS}
+                rows={KPI_LIBRARY_ROWS}
+                actions={["view", "delete"]}
+              />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">PO Updates</h3>
+              <DataTable
+                columns={KPI_LIBRARY_COLUMNS}
+                rows={PO_UPDATES_ROWS}
+                actions={["view", "delete"]}
+              />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                PO User Management
+              </h3>
+              <DataTable
+                columns={PO_USER_COLUMNS}
+                rows={PO_USER_ROWS}
+                actions={["view", "edit", "delete"]}
+              />
+            </div>
           </div>
 
-          <SectionHeader title="PO User Management" />
-          <div className="mb-6">
-            <DataTable
-              columns={PO_USER_COLUMNS}
-              rows={PO_USER_ROWS}
-              actions={["view", "edit", "delete"]}
-            />
-          </div>
-
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">
-            Recent Activity
-          </h3>
-          <DataTable
-            columns={[
-              { key: "name", label: "Name" },
-              { key: "action", label: "Action" },
-              { key: "time", label: "Timestamp" },
-            ]}
-            rows={ACTIVITY_LOG}
-          />
-        </section>
-
-        {/* System analytics */}
-        <section className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <div className="mb-4">
-            <h2 className="text-base font-semibold text-gray-900">
-              System Analytics Dashboard
-            </h2>
-            <p className="text-xs text-gray-400">
-              Platform-wide monitoring and performance metrics
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            {ANALYTICS_STATS.map((s) => (
-              <StatCard key={s.label} {...s} />
-            ))}
-          </div>
-
-          <ProgressBarList
-            title="Form Submission Tracking"
-            subtitle="Monthly submission trends over last 6 months"
-            trend="+18.4%"
-            data={SUBMISSION_TRACKING}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            {SYSTEM_METRICS.map((metric) => (
-              <div
-                key={metric.title}
-                className="rounded-lg border border-gray-100 p-4"
-              >
-                <p className="text-sm font-semibold text-gray-900 mb-3">
-                  {metric.title}
-                </p>
-                <dl className="space-y-2.5 text-sm">
-                  {metric.rows.map(([label, value]) => (
-                    <div key={label} className="flex items-center justify-between">
-                      <dt className="text-gray-400">{label}</dt>
-                      <dd className="font-medium text-gray-900">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">User Actions</h3>
+          <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg bg-white">
+            {USER_ACTIONS.map((action) => (
+              <div key={action.name + action.time} className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{action.name}</p>
+                  <p className="text-xs text-gray-400">Last Active</p>
+                </div>
+                <span className="text-xs text-gray-400">{action.time}</span>
               </div>
             ))}
           </div>
         </section>
 
-        <AdminFooter />
+        {/* System Analytics Dashboard */}
+        <section>
+          <h2 className="text-base font-semibold text-gray-900 mb-1">
+            System Analytics Dashboard
+          </h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Platform-wide monitoring and performance metrics
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <StatCard icon={TrendingUp} label="Focal Users" value="142" />
+            <StatCard icon={Users} label="Principal Users" value="18" />
+            <StatCard icon={Users} label="Admin Users" value="5" />
+          </div>
+
+          <div className="rounded-lg border border-gray-100 bg-white p-5 mb-6">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  Form Submission Tracking
+                </p>
+                <p className="text-xs text-gray-400">
+                  Monthly submission rate over the tracking period
+                </p>
+              </div>
+              <span className="flex items-center gap-1 text-sm font-medium text-emerald-600">
+                <TrendingUp size={15} />
+                34.2%
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="w-10 text-sm text-gray-500 shrink-0">JUL</span>
+              <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-brand rounded-full flex items-center justify-end px-3"
+                  style={{ width: "34%" }}
+                >
+                  <span className="text-white text-xs font-medium">34.2%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="rounded-lg border border-gray-100 bg-white p-4">
+              <p className="text-sm font-semibold text-gray-900 mb-3">Users</p>
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between"><dt className="text-gray-400">Registered Users</dt><dd className="font-medium text-gray-900">1,247</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Focal Users</dt><dd className="font-medium text-gray-900">142</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Principal Users</dt><dd className="font-medium text-gray-900">18</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Admin Users</dt><dd className="font-medium text-gray-900">5</dd></div>
+              </dl>
+            </div>
+            <div className="rounded-lg border border-gray-100 bg-white p-4">
+              <p className="text-sm font-semibold text-gray-900 mb-3">Forms</p>
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between"><dt className="text-gray-400">Forms Uploaded</dt><dd className="font-medium text-gray-900">142</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Average Submission Rate</dt><dd className="font-medium text-gray-900">87.3%</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Forms Disabled</dt><dd className="font-medium text-gray-900">6</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Updates Uploaded</dt><dd className="font-medium text-gray-900">34</dd></div>
+              </dl>
+            </div>
+            <div className="rounded-lg border border-gray-100 bg-white p-4">
+              <p className="text-sm font-semibold text-gray-900 mb-3">KPIs</p>
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between"><dt className="text-gray-400">KPIs Uploaded</dt><dd className="font-medium text-gray-900">89</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">KPIs Disabled</dt><dd className="font-medium text-gray-900">3</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Updates Uploaded</dt><dd className="font-medium text-gray-900">21</dd></div>
+                <div className="flex justify-between"><dt className="text-gray-400">Updates Disabled</dt><dd className="font-medium text-gray-900">2</dd></div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        {/* User Support Issues */}
+        <section>
+          <h2 className="text-base font-semibold text-gray-900 mb-1">
+            User Support Issues
+          </h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Manage and respond to user-submitted support requests
+          </p>
+
+          <div className="mb-6">
+            <div className="rounded-xl p-5 text-white bg-gradient-to-br from-brand to-brand-dark flex items-center justify-between">
+              <div>
+                <p className="text-sm opacity-90 mb-1">Total Issues Reported</p>
+                <p className="text-3xl font-bold">{totalIssues}</p>
+                <p className="text-xs opacity-80 mt-1">
+                  {pendingIssues} pending · {resolvedIssues} resolved
+                </p>
+              </div>
+              <Headphones size={40} className="opacity-30" />
+            </div>
+          </div>
+
+          {SUPPORT_ISSUES.map((issue) => (
+            <SupportIssueCard key={issue.id} issue={issue} />
+          ))}
+        </section>
       </main>
+
+      <AdminFooter />
     </div>
   );
 }
