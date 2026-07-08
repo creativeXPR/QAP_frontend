@@ -8,8 +8,9 @@ import PrivacyModeStep from "../../components/student/wizard/PrivacyModeStep";
 import AttachmentsStep from "../../components/student/wizard/AttachmentsStep";
 import ReviewSubmitStep from "../../components/student/wizard/ReviewSubmitStep";
 import { ALL_EXTRA_FIELD_KEYS } from "../../lib/classifications";
-import { buildSubmissionPayload } from "../../lib/feedback";
-import { getAuthHeaders, getStoredAccessToken } from "../../lib/auth";
+import { buildSubmissionRequestBody } from "../../lib/feedback";
+import { students } from "../../api/services";
+import { getStoredAccessToken } from "../../lib/auth";
 
 // Lives at /student/reports — the "New Submission" tab.
 // Steps: 0 = type, 1 = details, 2 = privacy mode, 3 = attachments,
@@ -41,6 +42,7 @@ export default function StudentReportWizard() {
   const [step, setStep] = useState(0);
   const [files, setFiles] = useState([]);
   const [form, setForm] = useState(initialForm);
+  const [submitting, setSubmitting] = useState(false);
 
   const update = (field) => (e) =>
     setForm({ ...form, [field]: e.target.value });
@@ -58,52 +60,24 @@ export default function StudentReportWizard() {
   };
 
   const handleSubmit = async () => {
-    const payload = buildSubmissionPayload(form);
+    const payload = buildSubmissionRequestBody(form, files);
 
     if (!getStoredAccessToken()) {
       console.error("No access token found. Please sign in again.");
       return;
     }
 
+    setSubmitting(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/students/feedback-tracking/`,
-        {
-          method: "POST",
-          headers: getAuthHeaders(),
-          body: JSON.stringify(payload),
-        },
-      );
-
-      let responseData = null;
-      const responseText = await response.text();
-      if (responseText) {
-        try {
-          responseData = JSON.parse(responseText);
-        } catch {
-          responseData = responseText;
-        }
-      }
-
-      if (!response.ok) {
-        console.error(
-          "Failed to submit report:",
-          response.status,
-          response.statusText,
-          responseData,
-        );
-        return;
-      }
-
-      console.log("Submission payload:", payload);
-      console.log("Submission response:", responseData);
+      await students.feedbackTracking.create(payload);
       navigate("/student/dashboard");
     } catch (error) {
       console.error("Failed to submit report:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
-  //   alert("StudentReportWizard.jsx: form = " + JSON.stringify(form));
-  console.log("StudentReportWizard.jsx: form = ", form);
+
   return (
     <StudentLayout sessionLabel="2025/2026 Session">
       <div className="max-w-xl mx-auto bg-white rounded-lg border border-gray-100 shadow-sm p-5 sm:p-6 md:p-8">
@@ -151,7 +125,9 @@ export default function StudentReportWizard() {
             form={form}
             files={files}
             onBack={() => setStep(3)}
-            onSubmit={handleSubmit}
+            onSubmit={() => {
+              if (!submitting) handleSubmit();
+            }}
           />
         )}
       </div>

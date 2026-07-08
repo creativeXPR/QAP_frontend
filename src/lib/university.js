@@ -1,13 +1,10 @@
-// Faculty & department lookups for the report submission form.
-const API_BASE = `${import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, "")}/api/core`;
+import { core } from "../api/services";
 
 /**
  * Returns the full faculty list: [{ id, name }, ...]
  */
 export async function getFaculties() {
-  const res = await fetch(`${API_BASE}/faculties/`);
-  if (!res.ok) throw new Error("Failed to load faculties");
-  return res.json();
+  return core.faculties.list();
 }
 
 /**
@@ -19,7 +16,5 @@ export async function getFaculties() {
  * doesn't currently expose a filtered endpoint.
  */
 export async function getDepartments() {
-  const res = await fetch(`${API_BASE}/departments/`);
-  if (!res.ok) throw new Error("Failed to load departments");
-  return res.json();
+  return core.departments.list();
 }

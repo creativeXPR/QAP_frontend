@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "../lib/icons";
-import { loginUser, ROLE_HOME_ROUTES } from "../lib/auth";
+import { getUserRole, loginUser, ROLE_HOME_ROUTES } from "../lib/auth";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ export default function SignIn() {
     try {
       const data = await loginUser(form.email, form.password);
 
-      const role = data.user?.status;
+      const role = data.user?.status || getUserRole();
       if (role && ROLE_HOME_ROUTES[role]) {
         navigate(ROLE_HOME_ROUTES[role]);
       } else {

@@ -1,6 +1,39 @@
 import { CLASSIFICATION_CONFIG } from "./classifications";
 import { getStoredUser } from "./auth";
 
+const CATEGORY_API_VALUES = {
+  Complaint: "complaint",
+  Suggestion: "suggestion",
+  Comment: "other",
+  Feedback: "other",
+  Concern: "complaint",
+  "Service Request": "support",
+  Inquiry: "inquiry",
+};
+
+const CLASSIFICATION_API_VALUES = {
+  Academics: "academic",
+  "Hostel/Welfare": "welfare",
+  Facilities: "facility",
+  "Staff Conduct": "administrative",
+  "Admin Delays": "administrative",
+  "Safety/Security": "other",
+  Results: "academic",
+};
+
+const URGENCY_API_VALUES = {
+  Low: "normal",
+  Medium: "normal",
+  High: "high",
+  Critical: "critical",
+};
+
+const SUBMISSION_MODE_API_VALUES = {
+  Anonymous: "anonymous",
+  Confidential: "confidential",
+  "Open Identity": "open_identity",
+};
+
 /**
  * Builds the exact feedback string format specified:
  *
@@ -62,10 +95,25 @@ export function buildSubmissionPayload(form) {
   return {
     student: user?.username || user?.name || "",
     student_email: user?.email || "",
-    category: form.submissionType,
-    classification: form.category,
-    urgency: form.urgency,
+    category: CATEGORY_API_VALUES[form.submissionType] || "other",
+    classification: CLASSIFICATION_API_VALUES[form.category] || "other",
+    urgency: URGENCY_API_VALUES[form.urgency] || "normal",
     feedback: buildFeedbackString(form),
-    submission_mode: form.privacyMode,
+    submission_mode: SUBMISSION_MODE_API_VALUES[form.privacyMode] || "open_identity",
   };
+}
+
+export function buildSubmissionRequestBody(form, files = []) {
+  const payload = buildSubmissionPayload(form);
+  if (!files.length) return payload;
+
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, value ?? "");
+  });
+  files.forEach((file) => {
+    formData.append("attachments", file);
+  });
+
+  return formData;
 }

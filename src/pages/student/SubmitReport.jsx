@@ -1,8 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import StudentLayout from "../../components/student/StudentLayout";
 import StepDots from "../../components/student/wizard/StepDots";
 import ReviewSubmitStep from "../../components/student/wizard/ReviewSubmitStep";
+import { students } from "../../api/services";
+import { buildSubmissionRequestBody } from "../../lib/feedback";
 
 // Lives at /student/reports/new — the "Submit Report" tab.
 // Only handles the final review & submit step. It expects to receive
@@ -13,6 +15,7 @@ export default function SubmitReport() {
   const navigate = useNavigate();
   const location = useLocation();
   const { form, files } = location.state || {};
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!form) {
@@ -22,10 +25,18 @@ export default function SubmitReport() {
 
   if (!form) return null;
 
-  const handleSubmit = () => {
-    // TODO: wire up to backend
-    console.log({ ...form, files });
-    navigate("/student/dashboard");
+  const handleSubmit = async () => {
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      await students.feedbackTracking.create(buildSubmissionRequestBody(form, files || []));
+      navigate("/student/dashboard");
+    } catch (error) {
+      console.error("Failed to submit report:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

@@ -1,7 +1,6 @@
-// Central place for all auth API calls.
-// The base URL comes from an environment variable so it's easy to point
-// at a different backend (staging, production) without touching this file.
-const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/auth`;
+import { api, getAuthHeaders } from "../api/client";
+
+export { getAuthHeaders };
 
 // The four roles your backend's "status" field can be.
 export const ROLES = {
@@ -37,6 +36,22 @@ function extractAuthType(data) {
   return String(rawType).charAt(0).toUpperCase() + String(rawType).slice(1);
 }
 
+function storeAuthSession(data, fallbackRole) {
+  const token = extractToken(data);
+  if (token) {
+    localStorage.setItem("access_token", token);
+    localStorage.setItem("auth_type", extractAuthType(data));
+  }
+  if (data?.refresh) localStorage.setItem("refresh_token", data.refresh);
+  if (data?.user_id) localStorage.setItem("user_id", data.user_id);
+
+  const role = extractRole(data) || fallbackRole;
+  const user = role && data?.user ? { ...data.user, status: data.user.status || role } : data?.user;
+
+  if (user) localStorage.setItem("user", JSON.stringify(user));
+  if (role) localStorage.setItem("user_role", role);
+}
+
 export function getStoredAccessToken() {
   return (
     localStorage.getItem("access_token") ||
@@ -45,18 +60,6 @@ export function getStoredAccessToken() {
     localStorage.getItem("accessToken") ||
     ""
   );
-}
-
-export function getAuthHeaders(includeJson = true) {
-  const headers = includeJson ? { "Content-Type": "application/json" } : {};
-  const token = getStoredAccessToken();
-
-  if (token) {
-    const authType = localStorage.getItem("auth_type") || "Bearer";
-    headers.Authorization = `${authType} ${token}`;
-  }
-
-  return headers;
 }
 
 /**
@@ -78,32 +81,16 @@ function extractRole(data) {
  * Throws an Error with a readable message on failure.
  */
 export async function loginUser(identifier, password) {
-  const res = await fetch(`${API_BASE}/login/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const data = await api.post(
+    "/api/auth/login/",
+    {
       username: identifier,
       password,
-    }),
-  });
+    },
+    { auth: false },
+  );
 
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    throw new Error(data?.error || "Invalid credentials");
-  }
-
-  const token = extractToken(data);
-  if (token) {
-    localStorage.setItem("access_token", token);
-    localStorage.setItem("auth_type", extractAuthType(data));
-  }
-  if (data?.refresh) localStorage.setItem("refresh_token", data.refresh);
-  if (data?.user_id) localStorage.setItem("user_id", data.user_id);
-  if (data?.user) localStorage.setItem("user", JSON.stringify(data.user));
-
-  const role = extractRole(data);
-  if (role) localStorage.setItem("user_role", role);
+  storeAuthSession(data);
 
   return data;
 }
@@ -119,60 +106,34 @@ export async function registerUser({
   passwordConfirm,
   status,
 }) {
-  const res = await fetch(`${API_BASE}/google/register/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const data = await api.post(
+    "/api/auth/google/register/",
+    {
       username,
       email,
       password,
       password_confirm: passwordConfirm,
       status,
-    }),
-  });
+    },
+    { auth: false },
+  );
 
-  let data = null;
-  try {
-    data = await res.json();
-  } catch {
-    data = null;
-  }
-
-  if (!res.ok) {
-    let message = "Registration failed";
-    if (data) {
-      if (typeof data === "string") {
-        message = data;
-      } else if (data.detail) {
-        message = data.detail;
-      } else {
-        message = Object.entries(data)
-          .map(([key, value]) =>
-            Array.isArray(value)
-              ? `${key}: ${value.join(" ")}`
-              : `${key}: ${value}`,
-          )
-          .join(" | ");
-      }
-    }
-    throw new Error(message);
-  }
-
-  const token = extractToken(data);
-  if (token) {
-    localStorage.setItem("access_token", token);
-    localStorage.setItem("auth_type", extractAuthType(data));
-  }
-  if (data?.refresh) localStorage.setItem("refresh_token", data.refresh);
-  if (data?.user_id) localStorage.setItem("user_id", data.user_id);
-  if (data?.user) localStorage.setItem("user", JSON.stringify(data.user));
-
-  // We already know the role client-side at registration time (the form
-  // value), so store it even if the response doesn't echo it back.
-  const role = extractRole(data) || status;
-  if (role) localStorage.setItem("user_role", role);
+  storeAuthSession(data, status);
 
   return data;
+}
+
+export async function requestPasswordReset(email) {
+  return api.post("/api/auth/password/reset/", { email }, { auth: false });
+}
+
+export async function logoutUser() {
+  try {
+    const refresh = localStorage.getItem("refresh_token");
+    await api.post("/api/auth/logout/", refresh ? { refresh } : {});
+  } finally {
+    logout();
+  }
 }
 
 export function logout() {

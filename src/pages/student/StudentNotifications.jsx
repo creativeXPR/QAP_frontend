@@ -1,76 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StudentLayout from "../../components/student/StudentLayout";
 import { RefreshCcw, CheckCircle2 } from "../../lib/icons";
-
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 1,
-    type: "review",
-    title: "Your Submission is now in review",
-    description: "The Physics Department has been contacted regarding your PHY101",
-    date: "2026-07-02",
-    time: "08:55",
-    read: false,
-  },
-  {
-    id: 2,
-    type: "review",
-    title: "Your Submission is now in review",
-    description: "The Physics Department has been contacted regarding your PHY101",
-    date: "2026-07-02",
-    time: "08:55",
-    read: false,
-  },
-  {
-    id: 3,
-    type: "resolved",
-    title: "Submission resolved & Closed",
-    description:
-      "The Physics Department has been contacted Your missing result concern has been resolved. Please confirm on the portal.regarding your PHY101",
-    date: "2026-07-02",
-    time: "08:55",
-    read: true,
-  },
-  {
-    id: 4,
-    type: "review",
-    title: "Your Submission is now in review",
-    description: "The Physics Department has been contacted regarding your PHY101",
-    date: "2026-07-02",
-    time: "08:55",
-    read: true,
-  },
-  {
-    id: 5,
-    type: "review",
-    title: "Your Submission is now in review",
-    description: "The Physics Department has been contacted regarding your PHY101",
-    date: "2026-07-02",
-    time: "08:55",
-    read: true,
-  },
-  {
-    id: 6,
-    type: "review",
-    title: "Your Submission is now in review",
-    description: "The Physics Department has been contacted regarding your PHY101",
-    date: "2026-07-02",
-    time: "08:55",
-    read: true,
-  },
-];
+import { getListItems } from "../../api/client";
+import { students } from "../../api/services";
 
 const TYPE_STYLES = {
   review: { icon: RefreshCcw, className: "bg-blue-50 text-blue-500" },
   resolved: { icon: CheckCircle2, className: "bg-emerald-50 text-emerald-600" },
 };
 
+function mapNotification(item) {
+  const createdAt = item?.created_at ? new Date(item.created_at) : null;
+
+  return {
+    id: item.id,
+    type: item.notification_type === "complaint_update" ? "review" : "review",
+    title: item.title,
+    description: item.message,
+    date: createdAt ? createdAt.toISOString().slice(0, 10) : "",
+    time: createdAt
+      ? createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "",
+    read: Boolean(item.is_read),
+  };
+}
+
 export default function StudentNotifications() {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAllAsRead = () => {
+  useEffect(() => {
+    async function loadNotifications() {
+      try {
+        const data = await students.notifications.list();
+        setNotifications(getListItems(data).map(mapNotification));
+      } catch (error) {
+        console.error("Failed to load notifications:", error);
+        setNotifications([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadNotifications();
+  }, []);
+
+  const markAllAsRead = async () => {
+    const unread = notifications.filter((n) => !n.read);
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
+    try {
+      await Promise.all(unread.map((n) => students.notifications.markRead(n.id)));
+    } catch (error) {
+      console.error("Failed to mark notifications as read:", error);
+    }
   };
 
   return (
@@ -90,7 +74,11 @@ export default function StudentNotifications() {
         </div>
 
         <div className="space-y-3">
-          {notifications.map((n) => {
+          {loading ? (
+            <p className="text-sm text-gray-500">Loading notifications...</p>
+          ) : notifications.length === 0 ? (
+            <p className="text-sm text-gray-500">No notifications found.</p>
+          ) : notifications.map((n) => {
             const { icon: Icon, className } = TYPE_STYLES[n.type] || TYPE_STYLES.review;
             return (
               <div

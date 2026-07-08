@@ -44,9 +44,11 @@ export function mapSubmissionFromApi(item) {
   const status =
     item?.status === "pending"
       ? "In Review"
+      : item?.status === "under_review"
+        ? "In Review"
       : item?.status === "resolved"
         ? "Resolved"
-        : item?.status || "Pending";
+        : formatLabel(item?.status || "pending");
 
   return {
     id: `UI 2026-QAP-${item?.id ?? ""}`,

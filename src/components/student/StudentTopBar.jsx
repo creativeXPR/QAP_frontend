@@ -3,7 +3,6 @@ import { getDateParts } from "../../lib/date";
  
 let userData = JSON.parse(localStorage.getItem("user"));
 let currentDate = getDateParts();
-console.log("Current Date:", currentDate, "User Data:", userData);
 
 /**
  * Single source of truth for the student welcome bar. StudentLayout
@@ -13,8 +12,7 @@ console.log("Current Date:", currentDate, "User Data:", userData);
  */
 export default function StudentTopBar({
   name = userData?.username || "Username",
-  date = `${currentDate[1]}, ${currentDate[0]}th ${currentDate[2]}` ||
-    "Monday, 6th July 2026",
+  date = `${currentDate[1]}, ${currentDate[0]}th ${currentDate[2]}`,
   sessionDisplay = "2025/2026",
   onMenuClick,
 }) {
