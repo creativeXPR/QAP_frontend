@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "../lib/icons";
+import errorImg from "/error404img.png";
 
 // NOTE: no actual illustration asset was provided for this design, so
 // the character/gear/leaf artwork is approximated with simple shapes
@@ -15,7 +16,11 @@ export default function NotFound() {
     <div className="min-h-screen bg-white">
       <header className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="Crest" className="h-9 w-auto object-contain" />
+          <img
+            src="/logo.png"
+            alt="Crest"
+            className="h-9 w-auto object-contain"
+          />
           <div className="leading-tight">
             <p className="text-sm font-semibold text-brand">
               DIRECTORATE OF QUALITY ASSURANCE
@@ -36,7 +41,7 @@ export default function NotFound() {
 
       <main className="flex flex-col items-center justify-center text-center px-4 py-20">
         <div className="relative flex items-center justify-center mb-6">
-          <span className="text-[7rem] sm:text-[9rem] font-extrabold text-brand leading-none">
+          {/* <span className="text-[7rem] sm:text-[9rem] font-extrabold text-brand leading-none">
             4
           </span>
 
@@ -53,7 +58,12 @@ export default function NotFound() {
 
           <span className="text-[7rem] sm:text-[9rem] font-extrabold text-brand leading-none">
             4
-          </span>
+          </span> */}
+          <img
+            src={errorImg}
+            alt="404 Illustration"
+            className="w-64 sm:w-100"
+          />
         </div>
 
         <p className="text-xl sm:text-2xl font-bold tracking-widest text-brand mb-3">

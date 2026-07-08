@@ -38,10 +38,24 @@ function extractAuthType(data) {
 
 function storeAuthSession(data, fallbackRole) {
   const token = extractToken(data);
+  console.log("[Auth] Login response token extraction:", {
+    allKeys: Object.keys(data),
+    extractedToken: token ? `${token.substring(0, 20)}...` : "NO TOKEN",
+    data_access: data?.access ? `${data.access.substring(0, 20)}...` : undefined,
+    data_token: data?.token ? `${data.token.substring(0, 20)}...` : undefined,
+  });
+  
   if (token) {
     localStorage.setItem("access_token", token);
     localStorage.setItem("auth_type", extractAuthType(data));
+    console.log("[Auth] Token stored in localStorage", {
+      tokenLength: token.length,
+      authType: extractAuthType(data),
+    });
+  } else {
+    console.warn("[Auth] NO TOKEN extracted from login response!");
   }
+  
   if (data?.refresh) localStorage.setItem("refresh_token", data.refresh);
   if (data?.user_id) localStorage.setItem("user_id", data.user_id);
 

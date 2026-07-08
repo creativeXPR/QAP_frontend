@@ -43,7 +43,7 @@ export class ApiError extends Error {
 
 function getStoredAccessToken() {
   return (
-    localStorage.getItem("access_token") ||
+    localStorage.getItem("data_access") ||
     localStorage.getItem("token") ||
     localStorage.getItem("jwt") ||
     localStorage.getItem("accessToken") ||
@@ -124,6 +124,20 @@ export function getAuthHeaders(includeJson = true) {
 
   if (token) {
     headers.Authorization = `${localStorage.getItem("auth_type") || "Bearer"} ${token}`;
+    console.log("[Auth] Authorization header set:", {
+      hasToken: !!token,
+      tokenLength: token.length,
+      tokenPreview: token.substring(0, 20) + "...",
+      authType: localStorage.getItem("auth_type") || "Bearer",
+    });
+  } else {
+    console.warn("[Auth] NO TOKEN FOUND - checking all storage keys:", {
+      access_token_length: (localStorage.getItem("access_token") || "").length,
+      token_length: (localStorage.getItem("token") || "").length,
+      jwt_length: (localStorage.getItem("jwt") || "").length,
+      accessToken_length: (localStorage.getItem("accessToken") || "").length,
+      allLocalStorageKeys: Object.keys(localStorage),
+    });
   }
 
   return headers;
@@ -154,6 +168,17 @@ export async function apiRequest(path, options = {}) {
   if (isFormData) {
     delete requestHeaders["Content-Type"];
   }
+
+  console.log("[API Request]", {
+    method,
+    url: apiUrl(path, params),
+    hasAuth: auth,
+    authorizationHeader: requestHeaders.Authorization
+      ? `${requestHeaders.Authorization.split(" ")[0]} ${requestHeaders.Authorization.split(" ")[1]?.substring(0, 20)}...`
+      : "MISSING ❌",
+    contentType: requestHeaders["Content-Type"],
+    credentials: "include",
+  });
 
   const response = await fetch(apiUrl(path, params), {
     method,

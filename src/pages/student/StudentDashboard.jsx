@@ -159,23 +159,6 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Report categories */}
-        <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
-          <p className="text-sm font-semibold text-gray-900 mb-3">
-            Report Categories
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(({ label, icon: Icon }) => (
-              <button
-                key={label}
-                className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 rounded-full px-3 py-1.5 hover:border-brand hover:text-brand"
-              >
-                <Icon size={14} />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Recent reports */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
