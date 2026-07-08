@@ -43,6 +43,7 @@ export class ApiError extends Error {
 
 function getStoredAccessToken() {
   return (
+    localStorage.getItem("access_token") || // <-- ADD THIS LINE
     localStorage.getItem("data_access") ||
     localStorage.getItem("token") ||
     localStorage.getItem("jwt") ||
