@@ -5,7 +5,10 @@ export const API_BASE_URL = (
 ).replace(/\/+$/, "");
 
 export class ApiError extends Error {
-  constructor(message, { status = 0, statusText = "", data = null, url = "" } = {}) {
+  constructor(
+    message,
+    { status = 0, statusText = "", data = null, url = "" } = {},
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -27,7 +30,11 @@ export class ApiError extends Error {
     if (this.data?.errors && typeof this.data.errors === "object") {
       return this.data.errors;
     }
-    if (this.data && typeof this.data === "object" && !Array.isArray(this.data)) {
+    if (
+      this.data &&
+      typeof this.data === "object" &&
+      !Array.isArray(this.data)
+    ) {
       return this.data;
     }
     return {};
@@ -136,7 +143,11 @@ export async function apiRequest(path, options = {}) {
   const isFormData = body instanceof FormData;
   const requestHeaders = {
     Accept: "application/json",
-    ...(auth ? getAuthHeaders(!isFormData) : isFormData ? {} : { "Content-Type": "application/json" }),
+    ...(auth
+      ? getAuthHeaders(!isFormData)
+      : isFormData
+        ? {}
+        : { "Content-Type": "application/json" }),
     ...headers,
   };
 
@@ -147,8 +158,13 @@ export async function apiRequest(path, options = {}) {
   const response = await fetch(apiUrl(path, params), {
     method,
     headers: requestHeaders,
-    body: body === undefined || body === null ? undefined : isFormData ? body : JSON.stringify(body),
-    credentials: 'include',
+    body:
+      body === undefined || body === null
+        ? undefined
+        : isFormData
+          ? body
+          : JSON.stringify(body),
+    credentials: "include",
     signal,
   });
 
@@ -179,13 +195,23 @@ export function createResource(basePath) {
   return {
     list: (params, options) => apiRequest(path, { ...options, params }),
     retrieve: (id, options) => apiRequest(`${path}${id}/`, options),
-    create: (payload, options) => apiRequest(path, { ...options, method: "POST", body: payload }),
+    create: (payload, options) =>
+      apiRequest(path, { ...options, method: "POST", body: payload }),
     update: (id, payload, options) =>
       apiRequest(`${path}${id}/`, { ...options, method: "PUT", body: payload }),
     partialUpdate: (id, payload, options) =>
-      apiRequest(`${path}${id}/`, { ...options, method: "PATCH", body: payload }),
-    remove: (id, options) => apiRequest(`${path}${id}/`, { ...options, method: "DELETE" }),
-    action: (id, action, { method = "POST", payload, params, responseType, ...options } = {}) =>
+      apiRequest(`${path}${id}/`, {
+        ...options,
+        method: "PATCH",
+        body: payload,
+      }),
+    remove: (id, options) =>
+      apiRequest(`${path}${id}/`, { ...options, method: "DELETE" }),
+    action: (
+      id,
+      action,
+      { method = "POST", payload, params, responseType, ...options } = {},
+    ) =>
       apiRequest(`${path}${id}/${action}/`, {
         ...options,
         method,
@@ -197,7 +223,12 @@ export function createResource(basePath) {
 }
 
 export function unwrapEnvelope(response) {
-  if (response && typeof response === "object" && "success" in response && "data" in response) {
+  if (
+    response &&
+    typeof response === "object" &&
+    "success" in response &&
+    "data" in response
+  ) {
     return response.data;
   }
   return response;
@@ -214,25 +245,34 @@ export function getListItems(response) {
 // whichever of the three shapes above the response came in — for
 // optimistic UI updates after a create/update/delete on one item.
 export function replaceListItem(response, id, updatedItem) {
-  const replace = (items) => items.map((item) => (item.id === id ? updatedItem : item));
+  const replace = (items) =>
+    items.map((item) => (item.id === id ? updatedItem : item));
   if (Array.isArray(response)) return replace(response);
-  if (Array.isArray(response?.data)) return { ...response, data: replace(response.data) };
-  if (Array.isArray(response?.results)) return { ...response, results: replace(response.results) };
+  if (Array.isArray(response?.data))
+    return { ...response, data: replace(response.data) };
+  if (Array.isArray(response?.results))
+    return { ...response, results: replace(response.results) };
   return response;
 }
 
 export function removeListItem(response, id) {
   const remove = (items) => items.filter((item) => item.id !== id);
   if (Array.isArray(response)) return remove(response);
-  if (Array.isArray(response?.data)) return { ...response, data: remove(response.data) };
-  if (Array.isArray(response?.results)) return { ...response, results: remove(response.results) };
+  if (Array.isArray(response?.data))
+    return { ...response, data: remove(response.data) };
+  if (Array.isArray(response?.results))
+    return { ...response, results: remove(response.results) };
   return response;
 }
 
 export const api = {
-  get: (path, params, options) => apiRequest(path, { ...options, method: "GET", params }),
-  post: (path, payload, options) => apiRequest(path, { ...options, method: "POST", body: payload }),
-  put: (path, payload, options) => apiRequest(path, { ...options, method: "PUT", body: payload }),
-  patch: (path, payload, options) => apiRequest(path, { ...options, method: "PATCH", body: payload }),
+  get: (path, params, options) =>
+    apiRequest(path, { ...options, method: "GET", params }),
+  post: (path, payload, options) =>
+    apiRequest(path, { ...options, method: "POST", body: payload }),
+  put: (path, payload, options) =>
+    apiRequest(path, { ...options, method: "PUT", body: payload }),
+  patch: (path, payload, options) =>
+    apiRequest(path, { ...options, method: "PATCH", body: payload }),
   delete: (path, options) => apiRequest(path, { ...options, method: "DELETE" }),
 };
