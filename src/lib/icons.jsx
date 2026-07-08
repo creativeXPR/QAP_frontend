@@ -29,6 +29,7 @@ import {
   TradeUpIcon,
   TradeDownIcon,
   MinusSignIcon,
+  PlusSignIcon,
   Refresh01Icon,
   UserGroupIcon,
   Layers01Icon,
@@ -100,6 +101,7 @@ export const BarChart2 = makeIcon(BarChartIcon);
 export const TrendingUp = makeIcon(TradeUpIcon);
 export const TrendingDown = makeIcon(TradeDownIcon);
 export const Minus = makeIcon(MinusSignIcon);
+export const Plus = makeIcon(PlusSignIcon);
 export const RefreshCcw = makeIcon(Refresh01Icon);
 export const Users = makeIcon(UserGroupIcon);
 export const Layers = makeIcon(Layers01Icon);

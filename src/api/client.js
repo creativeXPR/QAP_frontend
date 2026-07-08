@@ -148,6 +148,7 @@ export async function apiRequest(path, options = {}) {
     method,
     headers: requestHeaders,
     body: body === undefined || body === null ? undefined : isFormData ? body : JSON.stringify(body),
+    credentials: 'include',
     signal,
   });
 

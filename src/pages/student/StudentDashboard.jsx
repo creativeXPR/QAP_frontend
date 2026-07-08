@@ -14,6 +14,10 @@ import {
   Clock3,
   ShieldAlert,
   ClipboardList,
+  Menu,
+  BookOpen,
+  Activity,
+  Headphones,
 } from "../../lib/icons";
 import { getListItems } from "../../api/client";
 import { students } from "../../api/services";
@@ -35,6 +39,33 @@ const STATUS_STYLES = {
   Resolved: "bg-emerald-50 text-emerald-600",
 };
 
+// TODO: no backend endpoint currently exists for "Available Forms" —
+// no forms resource is registered in api/services.js. Using sample
+// data as a placeholder until a real forms.list()-style endpoint
+// exists to swap this out for.
+const AVAILABLE_FORMS = [
+  {
+    icon: BookOpen,
+    title: "Examination Administration Quality",
+    dueDate: "January 15, 2026",
+  },
+  {
+    icon: Activity,
+    title: "Daily Lecture Monitoring Form",
+    dueDate: "January 15, 2026",
+  },
+  {
+    icon: Headphones,
+    title: "Service Delivery & Complaint",
+    dueDate: "January 15, 2026",
+  },
+  {
+    icon: ShieldAlert,
+    title: "Health Facility Issue",
+    dueDate: "January 15, 2026",
+  },
+];
+
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
@@ -43,12 +74,12 @@ export default function StudentDashboard() {
   );
 
   // All of the student's reports — stats below must reflect this full
-  // list, not just the handful shown in "Recent Submissions".
+  // list, not just the handful shown in "Recent Reports".
   const allReports = useMemo(() => mapSubmissionsFromApi(getListItems(data)), [data]);
   const recentReports = allReports.slice(0, 3);
 
   const stats = [
-    { label: "Total Submissions", value: allReports.length, icon: BarChart2 },
+    { label: "Total Reports", value: allReports.length, icon: BarChart2 },
     {
       label: "Resolved",
       value: allReports.filter((item) => item.rawStatus === "resolved").length,
@@ -92,6 +123,42 @@ export default function StudentDashboard() {
           ))}
         </div>
 
+        {/* Available Forms */}
+        <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
+          <p className="text-sm font-semibold text-gray-900 mb-1">
+            Available Forms
+          </p>
+          <p className="text-xs text-gray-400 mb-4">
+            Select from the active forms below to submit your feedback,
+            course evaluations, or departmental assessments
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {AVAILABLE_FORMS.map(({ icon: Icon, title, dueDate }) => (
+              <div
+                key={title}
+                className="border border-gray-100 rounded-lg p-4 flex flex-col"
+              >
+                <span className="flex items-center justify-center w-9 h-9 rounded-md bg-brand text-white mb-3">
+                  <Icon size={16} />
+                </span>
+                <p className="text-sm font-semibold text-gray-900 mb-2 flex-1">
+                  {title}
+                </p>
+                <p className="flex items-center gap-1 text-xs text-gray-400 mb-4">
+                  Due: {dueDate}
+                </p>
+                <button
+                  onClick={() => navigate("/student/reports")}
+                  className="text-sm font-medium text-gray-700 border border-gray-200 rounded-[10px] py-2 hover:bg-gray-50"
+                >
+                  Start
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Report categories */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
           <p className="text-sm font-semibold text-gray-900 mb-3">
@@ -115,7 +182,7 @@ export default function StudentDashboard() {
           <div className="flex items-center justify-between mb-1 flex-wrap gap-3">
             <div>
               <p className="text-sm font-semibold text-gray-900">
-                Recent Submissions
+                Recent Reports
               </p>
               <p className="text-xs text-gray-400">
                 Overview of your submitted reports
@@ -123,16 +190,16 @@ export default function StudentDashboard() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => navigate("/student/reports/new")}
-                className="text-sm font-medium text-gray-700 border border-gray-200 px-4 py-2 rounded-full hover:bg-gray-50"
+                className="flex items-center gap-1.5 text-sm font-medium text-gray-700 border border-gray-200 px-4 py-2 rounded-[10px] hover:bg-gray-50"
               >
-                Submit Report
+                <Menu size={15} />
+                Filters
               </button>
               <button
-                onClick={() => navigate("/student/reports")}
-                className="text-sm font-medium text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-full"
+                onClick={() => navigate("/student/reports/new")}
+                className="text-sm font-medium text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-[10px]"
               >
-                Track Cases
+                Submit Report
               </button>
             </div>
           </div>

@@ -17,6 +17,8 @@ import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentReportWizard from "./pages/student/StudentReportWizard";
 import StudentNotifications from "./pages/student/StudentNotifications";
 import StudentSubmissionsList from "./pages/student/StudentSubmissionsList";
+import StudentProfile from "./pages/student/StudentProfile";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -78,6 +80,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/student/profile"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+              <StudentProfile />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/student/reports"
           element={
@@ -111,7 +122,7 @@ function App() {
           }
         />
 
-        <Route path="*" element={<Navigate to="/sign-in" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

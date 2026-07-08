@@ -43,6 +43,7 @@ export default function StudentReportWizard() {
   const [files, setFiles] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const update = (field) => (e) =>
     setForm({ ...form, [field]: e.target.value });
@@ -60,19 +61,24 @@ export default function StudentReportWizard() {
   };
 
   const handleSubmit = async () => {
-    const payload = buildSubmissionRequestBody(form, files);
+    setSubmitError("");
 
     if (!getStoredAccessToken()) {
-      console.error("No access token found. Please sign in again.");
+      setSubmitError("Your session has expired. Please sign in again to submit this report.");
       return;
     }
+
+    const payload = buildSubmissionRequestBody(form, files);
 
     setSubmitting(true);
     try {
       await students.feedbackTracking.create(payload);
       navigate("/student/dashboard");
-    } catch (error) {
-      console.error("Failed to submit report:", error);
+    } catch (err) {
+      console.error("Failed to submit report:", err);
+      setSubmitError(
+        err?.message || "Something went wrong submitting your report. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -82,6 +88,12 @@ export default function StudentReportWizard() {
     <StudentLayout sessionLabel="2025/2026 Session">
       <div className="max-w-xl mx-auto bg-white rounded-lg border border-gray-100 shadow-sm p-5 sm:p-6 md:p-8">
         <StepDots activeDot={dotForStep(step)} />
+
+        {submitError && (
+          <div className="mb-4 rounded-md bg-red-50 border border-red-100 px-3 py-2 text-sm text-red-600">
+            {submitError}
+          </div>
+        )}
 
         {step === 0 && (
           <SubmissionTypeStep

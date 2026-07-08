@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import StudentLayout from "../../components/student/StudentLayout";
+import AsyncState from "../../components/common/AsyncState";
 import { Search, ChevronDown } from "../../lib/icons";
 import { getListItems } from "../../api/client";
 import { students } from "../../api/services";
 import { mapSubmissionsFromApi } from "../../lib/submissionMapper";
+import { useApiQuery } from "../../hooks/useApiResource";
 
 const STATUS_STYLES = {
   "In Review": "bg-gray-100 text-gray-500",
@@ -14,29 +16,15 @@ export default function StudentSubmissionsList() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [type, setType] = useState("All Types");
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadSubmissions() {
-      try {
-        const data = await students.feedbackTracking.list();
-        console.debug("students.feedbackTracking.list response:", data);
-        const items = getListItems(data);
-        console.debug("unwrapped list items:", items);
-        const mapped = mapSubmissionsFromApi(items);
-        console.debug("mapped submissions:", mapped);
-        setSubmissions(mapped);
-      } catch (error) {
-        console.error("Failed to load submissions:", error);
-        setSubmissions([]);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const { data, loading, error, refetch } = useApiQuery(
+    useCallback(() => students.feedbackTracking.list(), []),
+  );
 
-    loadSubmissions();
-  }, []);
+  const submissions = useMemo(
+    () => mapSubmissionsFromApi(getListItems(data)),
+    [data],
+  );
 
   const filteredSubmissions = useMemo(() => {
     return submissions.filter((submission) => {
@@ -118,12 +106,15 @@ export default function StudentSubmissionsList() {
 
         {/* List */}
         <div className="space-y-3">
-          {loading ? (
-            <p className="text-sm text-gray-500">Loading submissions...</p>
-          ) : filteredSubmissions.length === 0 ? (
-            <p className="text-sm text-gray-500">No submissions found.</p>
-          ) : (
-            filteredSubmissions.map((s, i) => (
+          <AsyncState
+            loading={loading}
+            error={error}
+            empty={filteredSubmissions.length === 0}
+            onRetry={refetch}
+            loadingLabel="Loading submissions..."
+            emptyLabel="No submissions found."
+          >
+            {filteredSubmissions.map((s, i) => (
               <div
                 key={`${s.id}-${i}`}
                 className="border border-gray-100 rounded-lg px-4 py-4 flex items-center justify-between flex-wrap gap-2"
@@ -150,8 +141,8 @@ export default function StudentSubmissionsList() {
                   {s.status}
                 </span>
               </div>
-            ))
-          )}
+            ))}
+          </AsyncState>
         </div>
       </div>
     </StudentLayout>
