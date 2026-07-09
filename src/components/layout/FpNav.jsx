@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutModal from "../common/LogoutModal";
 
-export default function Navbar({ showLogout = true }) {
+export default function FpNav({ showLogout = true }) {
   const [open, setOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
@@ -42,14 +42,14 @@ export default function Navbar({ showLogout = true }) {
         </div>
 
         {/* Back Button */}
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
           <button
             onClick={handleBack}
             className="border border-gray-300 text-gray-700 text-base font-medium px-4 py-2 rounded-[10px] hover:bg-gray-50"
           >
             Back
           </button>
-        </div>
+        </div> */}
       </div>
 
       {open && (

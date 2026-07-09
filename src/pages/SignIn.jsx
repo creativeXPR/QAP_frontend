@@ -43,33 +43,40 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-white">
-      {/* Left brand panel — hidden on mobile, shown on md+ */}
+    <div className="min-h-screen bg-white flex flex-col md:flex-row">
+      {/* Desktop brand panel */}
       <div className="hidden md:flex md:w-1/2 bg-brand flex-col items-center justify-center px-10 py-16 text-center">
-        <img src="/logo.png" alt="University crest" className="h-20 w-auto object-contain mb-6" />
+        <img
+          src="/logo.png"
+          alt="University crest"
+          className="h-20 w-auto object-contain mb-6"
+        />
+
         <h1 className="text-white text-2xl font-semibold mb-3">
-          Quality Assurance Excellence
+          University of Ibadan Directorate of Quality Assurance
         </h1>
+
         <p className="text-blue-100 text-sm max-w-xs">
-          Streamlining institutional quality management and continuous
-          improvement at the University of Ibadan
+          Doing the right thing right, everytime.
         </p>
       </div>
 
-      {/* Mobile top banner */}
-      <div className="flex md:hidden bg-brand flex-col items-center justify-center px-6 py-8 text-center">
-        <img src="/logo.png" alt="University crest" className="h-14 w-auto object-contain mb-3" />
-        <h1 className="text-white text-lg font-semibold">
-          Quality Assurance Excellence
-        </h1>
+      {/* Mobile logo */}
+      <div className="md:hidden w-full px-6 pt-8">
+        <img
+          src="/logo.png"
+          alt="University crest"
+          className="h-20 w-auto object-contain"
+        />
       </div>
 
       {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-10 md:py-16">
+      <div className="flex-1 flex items-center justify-center px-6 py-8 sm:px-8 md:py-16">
         <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-1">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1">
             Welcome Back
           </h2>
+
           <p className="text-sm text-gray-500 mb-6">
             Sign in to access your Quality Assurance Workspace
           </p>
@@ -83,8 +90,9 @@ export default function SignIn() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email or Username
+                Email
               </label>
+
               <input
                 type="text"
                 name="email"
@@ -100,6 +108,7 @@ export default function SignIn() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
+
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -110,6 +119,7 @@ export default function SignIn() {
                   placeholder="Enter your password"
                   className="w-full rounded-md border border-gray-300 px-3 py-2.5 pr-10 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
@@ -131,7 +141,11 @@ export default function SignIn() {
                 />
                 Remember me
               </label>
-              <Link to="/forgot-password" className="text-brand font-medium hover:underline">
+
+              <Link
+                to="/forgot-password"
+                className="text-brand font-medium hover:underline"
+              >
                 Forgot Password?
               </Link>
             </div>
@@ -147,9 +161,22 @@ export default function SignIn() {
 
           <p className="text-center text-sm text-gray-500 mt-5">
             Don't have an account?{" "}
-            <Link to="/sign-up" className="text-brand font-medium hover:underline">
+            <Link
+              to="/sign-up"
+              className="text-brand font-medium hover:underline"
+            >
               Sign up
             </Link>
+          </p>
+
+          <p className="text-center text-xs text-gray-400 mt-6">
+            Need help? Contact{" "}
+            <a
+              href="mailto:qa.office@ui.edu.ng"
+              className="text-brand hover:underline"
+            >
+              Quality Assurance Support
+            </a>
           </p>
         </div>
       </div>

@@ -93,7 +93,7 @@ function App() {
           path="/student/reports"
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentReportWizard />
+              <StudentSubmissionsList />
             </ProtectedRoute>
           }
         />
@@ -101,7 +101,7 @@ function App() {
           path="/student/reports/new"
           element={
             <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentSubmissionsList />
+              <StudentReportWizard />
             </ProtectedRoute>
           }
         />

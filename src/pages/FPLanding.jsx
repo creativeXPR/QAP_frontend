@@ -1,11 +1,12 @@
 import { useCallback, useMemo } from "react";
-import Navbar from "../components/layout/Navbar";           // shared top nav bar
-import Footer from "../components/layout/Footer";           // shared page footer
-import AsyncState from "../components/common/AsyncState";   // loading/error/empty wrapper (imported but not yet used below)
+import Navbar from "../components/layout/Navbar"; // shared top nav bar
+import FpNav from "../components/layout/FpNav";
+import Footer from "../components/layout/Footer"; // shared page footer
+import AsyncState from "../components/common/AsyncState"; // loading/error/empty wrapper (imported but not yet used below)
 import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard"; // imported but not yet rendered here
-import { useApiQuery } from "../hooks/useApiResource";       // hook: fires a GET on mount, tracks {data, loading, error}
+import { useApiQuery } from "../hooks/useApiResource"; // hook: fires a GET on mount, tracks {data, loading, error}
 import { getListItems, replaceListItem } from "../api/client"; // helpers to read paginated list responses / patch one item in them
-import { students } from "../api/services";                 // grouped API calls under /api/students/...
+import { students } from "../api/services"; // grouped API calls under /api/students/...
 import { mapFeedbackListForStaff } from "../lib/submissionMapper"; // normalizes raw feedback API rows into UI-friendly case objects
 import {
   BarChart2,
@@ -19,6 +20,8 @@ import {
   ShieldAlert,
   Bell,
 } from "../lib/icons";
+import UserProfile from "./UserProfile";
+import { useNavigate } from "react-router-dom";
 
 // =====================================================================
 // PLACEHOLDER DATA — mirrors the reference "home" template's #forms and
@@ -52,10 +55,30 @@ import {
 // =====================================================================
 
 const PLACEHOLDER_FORMS = [
-  { id: "form-1", icon: BookOpen, title: "Examination Administration Quality", dueDate: "January 15, 2026" },
-  { id: "form-2", icon: Activity, title: "Daily Lecture Monitoring Form", dueDate: "January 15, 2026" },
-  { id: "form-3", icon: Headphones, title: "Service Delivery & Complaint", dueDate: "January 15, 2026" },
-  { id: "form-4", icon: ShieldAlert, title: "Health Facility Issue", dueDate: "January 15, 2026" },
+  {
+    id: "form-1",
+    icon: BookOpen,
+    title: "Examination Administration Quality",
+    dueDate: "January 15, 2026",
+  },
+  {
+    id: "form-2",
+    icon: Activity,
+    title: "Daily Lecture Monitoring Form",
+    dueDate: "January 15, 2026",
+  },
+  {
+    id: "form-3",
+    icon: Headphones,
+    title: "Service Delivery & Complaint",
+    dueDate: "January 15, 2026",
+  },
+  {
+    id: "form-4",
+    icon: ShieldAlert,
+    title: "Health Facility Issue",
+    dueDate: "January 15, 2026",
+  },
 ];
 
 const PLACEHOLDER_UPDATES = [
@@ -98,27 +121,7 @@ export default function FPLanding() {
   // Derives the 4 summary stat cards from `cases` — no separate API
   // call needed since it's just counting/filtering data already fetched.
   const stats = useMemo(
-    () => [
-      { label: "Total Cases", value: cases.length, icon: BarChart2 },
-      {
-        label: "Resolved",
-        value: cases.filter((c) => c.rawStatus === "resolved").length,
-        icon: CheckCircle2,
-        iconBg: "bg-emerald-50 text-emerald-600",
-      },
-      {
-        label: "Pending",
-        value: cases.filter((c) => c.rawStatus === "pending").length,
-        icon: Clock3,
-        iconBg: "bg-amber-50 text-amber-600",
-      },
-      {
-        label: "High/Critical Urgency",
-        value: cases.filter((c) => c.rawUrgency === "high" || c.rawUrgency === "critical").length,
-        icon: AlertTriangle,
-        iconBg: "bg-red-50 text-red-500",
-      },
-    ],
+    () => [{ label: "Total Cases", value: cases.length, icon: BarChart2 }],
     [cases],
   );
 
@@ -128,10 +131,11 @@ export default function FPLanding() {
   const handleCaseUpdated = (updated) => {
     setFeedbackResponse((prev) => replaceListItem(prev, updated.id, updated));
   };
+  const navigate = useNavigate();
 
   return (
     <div className="bg-white min-h-screen">
-      <Navbar />
+      <FpNav />
 
       {/* Hero — static marketing/intro copy, no API data involved.
           "Start Submission" / "View My Profile" buttons are inert;
@@ -149,7 +153,10 @@ export default function FPLanding() {
           <button className="bg-brand hover:bg-brand-dark text-white text-base font-medium px-5 py-2.5 rounded-[10px]">
             Start Submission
           </button>
-          <button className="border border-gray-300 text-gray-700 text-base font-medium px-5 py-2.5 rounded-[10px] hover:bg-gray-50">
+          <button
+            className="border border-gray-300 text-gray-700 text-base font-medium px-5 py-2.5 rounded-[10px] hover:bg-gray-50"
+            onClick={() => navigate("/profile/me")}
+          >
             View My Profile
           </button>
         </div>
@@ -190,7 +197,7 @@ export default function FPLanding() {
             See the "TO WIRE UP REAL DATA" comment near the top of this
             file for how to swap in students.updates.list() once that
             endpoint exists. */}
-        <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
+        {/* <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
             <Bell size={15} />
             Updates
@@ -220,7 +227,9 @@ export default function FPLanding() {
                   <span className="inline-block text-[11px] font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full mb-3 w-fit">
                     {update.tag}
                   </span>
-                  <p className="text-xs text-gray-400 mb-4">Due: {update.dueDate}</p>
+                  <p className="text-xs text-gray-400 mb-4">
+                    Due: {update.dueDate}
+                  </p>
                   <button className="text-sm font-medium text-gray-700 border border-gray-200 rounded-[10px] py-2 hover:bg-gray-50">
                     View
                   </button>
@@ -228,19 +237,18 @@ export default function FPLanding() {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Available Forms — currently PLACEHOLDER_FORMS (static array above).
             See the "TO WIRE UP REAL DATA" comment near the top of this
             file for how to swap in students.forms.list() once that
             endpoint exists. */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
-          <p className="text-sm font-semibold text-gray-900 mb-1">
-            Available Forms
+          <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
+            <Bell size={15} />
+            Updates
           </p>
-          <p className="text-xs text-gray-400 mb-4">
-            Select a form to begin or continue a submission.
-          </p>
+          <p className="text-xs text-gray-400 mb-4">Select a form to begin</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {PLACEHOLDER_FORMS.map(({ id, icon: Icon, title, dueDate }) => (
@@ -262,10 +270,9 @@ export default function FPLanding() {
             ))}
           </div>
         </div>
-
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }

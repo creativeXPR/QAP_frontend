@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import POTopNav from "../components/layout/POTopNav";
 import AdminFooter from "../components/layout/AdminFooter";
 import StatCard from "../components/dashboard/StatCard";
@@ -15,6 +15,10 @@ import {
   Briefcase,
   ChevronDown,
 } from "../lib/icons";
+import AsyncState from "../components/common/AsyncState";
+import { useApiQuery } from "../hooks/useApiResource";
+import { getListItems } from "../api/client";
+import { analytics } from "../api/services";
 
 // =====================================================================
 // PLACEHOLDER DATA — no backend endpoint for KPIs or PMP Updates exists
@@ -100,9 +104,21 @@ const TYPE_ICON = {
 };
 
 const STATUS_STYLES = {
-  improving: { icon: TrendingUp, label: "Improving", className: "text-emerald-600 bg-emerald-50" },
-  stable: { icon: Minus, label: "Stable", className: "text-amber-600 bg-amber-50" },
-  declining: { icon: TrendingDown, label: "Declining", className: "text-red-500 bg-red-50" },
+  improving: {
+    icon: TrendingUp,
+    label: "Improving",
+    className: "text-emerald-600 bg-emerald-50",
+  },
+  stable: {
+    icon: Minus,
+    label: "Stable",
+    className: "text-amber-600 bg-amber-50",
+  },
+  declining: {
+    icon: TrendingDown,
+    label: "Declining",
+    className: "text-red-500 bg-red-50",
+  },
 };
 
 function UpdateCard({ update }) {
@@ -113,7 +129,9 @@ function UpdateCard({ update }) {
         <Icon size={13} />
         {update.type}
       </span>
-      <h3 className="text-sm font-semibold text-gray-900 mb-2">{update.title}</h3>
+      <h3 className="text-sm font-semibold text-gray-900 mb-2">
+        {update.title}
+      </h3>
       <span className="inline-block text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mb-2">
         {update.tag}
       </span>
@@ -133,8 +151,11 @@ function UpdateCard({ update }) {
 
 function KPICard({ kpi }) {
   const [open, setOpen] = useState(false);
-  const { icon: StatusIcon, label, className: statusClass } =
-    STATUS_STYLES[kpi.status] || STATUS_STYLES.stable;
+  const {
+    icon: StatusIcon,
+    label,
+    className: statusClass,
+  } = STATUS_STYLES[kpi.status] || STATUS_STYLES.stable;
 
   return (
     <div className="border border-gray-100 rounded-lg bg-white mb-3 overflow-hidden">
@@ -144,7 +165,9 @@ function KPICard({ kpi }) {
       >
         <div>
           <h3 className="text-sm font-semibold text-gray-900">{kpi.title}</h3>
-          <p className="text-xs text-gray-400 mt-0.5 capitalize">{kpi.category}</p>
+          <p className="text-xs text-gray-400 mt-0.5 capitalize">
+            {kpi.category}
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <span
@@ -163,26 +186,67 @@ function KPICard({ kpi }) {
       {open && (
         <div className="px-4 pb-4 border-t border-gray-100 pt-3">
           <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-2xl font-semibold text-brand">{kpi.value}</span>
+            <span className="text-2xl font-semibold text-brand">
+              {kpi.value}
+            </span>
             <span className="text-xs text-gray-400">
               {kpi.changePercent} ({kpi.changePeriod})
             </span>
           </div>
-          <p className="text-sm text-gray-500 leading-relaxed">{kpi.analysisText}</p>
-          {/* Analytical KPIs with an embedded chart/iframe would render here,
-              e.g. kpi.mode === 'analytical' && <iframe src={kpi.frameContent} ... /> */}
+          <p className="text-sm text-gray-500 leading-relaxed">
+            {kpi.analysisText}
+          </p>
+          {Object.keys(kpi.metrics).length > 0 && (
+            <div className="space-y-2 mt-3">
+              {Object.entries(kpi.metrics).map(([key, value]) => (
+                <div key={key} className="flex justify-between text-sm">
+                  <span className="capitalize text-gray-500">
+                    {key.replace(/_/g, " ")}
+                  </span>
+
+                  <span className="font-semibold text-brand">{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {kpi.embedLink && (
+            <iframe
+              src={kpi.embedLink}
+              title={kpi.title}
+              className="w-full h-96 rounded-lg border mt-4"
+              loading="lazy"
+            />
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function CollapsibleSection({ icon: Icon, title, subtitle, children }) {
-  const [open, setOpen] = useState(false);
+function CollapsibleSection({
+  icon: Icon,
+  title,
+  subtitle,
+  children,
+  open: controlledOpen,
+  onToggle,
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+
+  const toggle = () => {
+    if (onToggle) {
+      onToggle(!open);
+    } else {
+      setInternalOpen((v) => !v);
+    }
+  };
   return (
     <section>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         className="w-full flex items-center justify-between gap-3 border border-gray-100 rounded-lg px-4 py-3 bg-white sticky top-0 z-10"
       >
         <div className="text-left">
@@ -207,11 +271,60 @@ export default function PODashboard() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
+  const [openKpis, setOpenKpis] = useState(false);
+  const kpiSectionRef = useRef(null);
 
   // TODO (real API): once KPIs come from the backend, drop this line and
   // do `const kpis = getListItems(kpiResponse);` instead.
-  const kpis = PLACEHOLDER_KPIS;
-  const updates = PLACEHOLDER_UPDATES;
+  // const kpis = PLACEHOLDER_KPIS;
+  const {
+    data: kpiResponse,
+    loading: kpisLoading,
+    error: kpisError,
+    refetch: refetchKpis,
+  } = useApiQuery(useCallback(() => analytics.kpis.list(), []));
+  const {
+    data: updatesResponse,
+    loading: updatesLoading,
+    error: updatesError,
+    refetch: refetchUpdates,
+  } = useApiQuery(useCallback(() => analytics.updates.list(), []));
+  const kpis = useMemo(() => {
+    return getListItems(kpiResponse).map((item) => {
+      const metrics = item.metrics ?? {};
+      const firstMetric = Object.values(metrics)[0];
+
+      return {
+        id: item.id,
+        title: item.title,
+        category: "General",
+        status: "stable",
+        value: firstMetric ?? "--",
+        changePercent: "",
+        changePeriod: "",
+        analysisText: item.description,
+        embedLink: item.embedlink,
+        metrics,
+      };
+    });
+  }, [kpiResponse]);
+  const updates = useMemo(() => {
+    return getListItems(updatesResponse).map((item) => ({
+      id: item.id,
+      type: item.category,
+      title: item.title,
+      tag: item.classification,
+      dueDate: "",
+      links: item.button
+        ? [
+            {
+              title: item.button.label,
+              url: item.button.url,
+            },
+          ]
+        : [],
+    }));
+  }, [updatesResponse]);
 
   // Category options are derived from the actual KPI data (matching the
   // reference's dynamic category-filter behavior), not hardcoded.
@@ -220,14 +333,29 @@ export default function PODashboard() {
     return ["all", ...unique];
   }, [kpis]);
 
+  // const filteredKpis = useMemo(() => {
+  //   return kpis.filter((kpi) => {
+  //     const matchesSearch =
+  //       !search ||
+  //       kpi.title.toLowerCase().includes(search.toLowerCase()) ||
+  //       kpi.analysisText.toLowerCase().includes(search.toLowerCase());
+  //     const matchesCategory = category === "all" || kpi.category === category;
+  //     const matchesStatus = status === "all" || kpi.status === status;
+  //     return matchesSearch && matchesCategory && matchesStatus;
+  //   });
+  // }, [kpis, search, category, status]);
+
   const filteredKpis = useMemo(() => {
     return kpis.filter((kpi) => {
       const matchesSearch =
         !search ||
         kpi.title.toLowerCase().includes(search.toLowerCase()) ||
-        kpi.analysisText.toLowerCase().includes(search.toLowerCase());
+        (kpi.analysisText ?? "").toLowerCase().includes(search.toLowerCase());
+
       const matchesCategory = category === "all" || kpi.category === category;
+
       const matchesStatus = status === "all" || kpi.status === status;
+
       return matchesSearch && matchesCategory && matchesStatus;
     });
   }, [kpis, search, category, status]);
@@ -240,8 +368,18 @@ export default function PODashboard() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <POTopNav />
+      <POTopNav
+        onAnalyzeClick={() => {
+          setOpenKpis(true);
 
+          setTimeout(() => {
+            kpiSectionRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }, 100);
+        }}
+      />{" "}
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-8">
         <div>
           <h1 className="text-lg font-semibold text-gray-900">
@@ -257,8 +395,34 @@ export default function PODashboard() {
             kpis.filter(k => !k.disabled).length */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatCard icon={FileText} label="Total KPIs" value={kpis.length} />
-          <StatCard icon={Clock3} label="Total PMP Updates" value={updates.length} />
+          <StatCard
+            icon={Clock3}
+            label="Total PMP Updates"
+            value={updates.length}
+          />
         </div>
+
+        {/* Updates (collapsible) */}
+        <CollapsibleSection
+          icon={Bell}
+          title="Updates"
+          subtitle="Principal updates with expandable cards for better readability"
+        >
+          <AsyncState
+            loading={updatesLoading}
+            error={updatesError}
+            empty={updates.length === 0}
+            onRetry={refetchUpdates}
+            loadingLabel="Loading updates..."
+            emptyLabel="No updates available."
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {updates.map((update) => (
+                <UpdateCard key={update.id} update={update} />
+              ))}
+            </div>
+          </AsyncState>
+        </CollapsibleSection>
 
         {/* Filters */}
         <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
@@ -330,42 +494,31 @@ export default function PODashboard() {
           </div>
         </section>
 
-        {/* Updates (collapsible) */}
-        <CollapsibleSection
-          icon={Bell}
-          title="Updates"
-          subtitle="Principal updates with expandable cards for better readability"
-        >
-          {updates.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">
-              No updates available at the moment.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {updates.map((update) => (
-                <UpdateCard key={update.id} update={update} />
-              ))}
-            </div>
-          )}
-        </CollapsibleSection>
-
         {/* KPIs (collapsible, each card independently collapsible) */}
-        <CollapsibleSection
-          icon={BarChart2}
-          title="KPIs"
-          subtitle="KPI cards with expandable descriptions and charts"
-        >
-          {filteredKpis.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">
-              No KPIs match your filters. Try adjusting your criteria.
-            </p>
-          ) : (
-            filteredKpis.map((kpi) => <KPICard key={kpi.id} kpi={kpi} />)
-          )}
-        </CollapsibleSection>
+        <div ref={kpiSectionRef}>
+          <CollapsibleSection
+            icon={BarChart2}
+            title="KPIs"
+            subtitle="KPI cards with expandable descriptions and charts"
+            open={openKpis}
+            onToggle={setOpenKpis}
+          >
+            <AsyncState
+              loading={kpisLoading}
+              error={kpisError}
+              empty={filteredKpis.length === 0}
+              onRetry={refetchKpis}
+              loadingLabel="Loading KPIs..."
+              emptyLabel="No KPIs found."
+            >
+              {filteredKpis.map((kpi) => (
+                <KPICard key={kpi.id} kpi={kpi} />
+              ))}
+            </AsyncState>
+          </CollapsibleSection>
+        </div>
       </main>
-
-      <AdminFooter />
+      {/* <AdminFooter /> */}
     </div>
   );
 }

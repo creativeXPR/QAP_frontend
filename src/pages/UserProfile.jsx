@@ -4,22 +4,47 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import LogoutModal from "../components/common/LogoutModal";
 import { Briefcase, Building2, Mail, ShieldCheck, LogOut } from "../lib/icons";
+import { getStoredUser } from "../lib/auth";
 
-const USER = {
-  name: "Dr. Adewale Olumide Johnson",
-  roleTag: "Principal Officer",
-  initials: "DA",
-  fields: [
-    { icon: Briefcase, label: "Role", value: "Principal Officer" },
-    { icon: Building2, label: "Department/Unit", value: "Principal Officer" },
-    { icon: Mail, label: "Email Address", value: "a.johnson@ui.edu.ng" },
-    { icon: ShieldCheck, label: "Access Level", value: "University-wide" },
-  ],
-};
+function getRoleLabel(status) {
+  switch (status) {
+    case "principle_officer":
+      return "Principal Officer";
+    case "focal_person":
+      return "Focal Person";
+    case "student":
+      return "Student";
+    case "admin":
+      return "Admin";
+    default:
+      return status ? String(status).replace(/_/g, " ") : "User";
+  }
+}
 
 export default function UserProfile() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
+  const storedUser = getStoredUser() || {};
+  const name = storedUser.username || "Dr. Adewale Olumide Johnson";
+  const roleTag = getRoleLabel(storedUser.status);
+  const initials = name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const USER = {
+    name,
+    roleTag,
+    initials,
+    fields: [
+      { icon: Briefcase, label: "Role", value: roleTag },
+
+      { icon: Mail, label: "Email Address", value: storedUser.email || "—" },
+      ,
+    ],
+  };
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
@@ -52,7 +77,10 @@ export default function UserProfile() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3 mt-4">
                   {USER.fields.map(({ icon: Icon, label, value }) => (
                     <div key={label} className="flex items-start gap-2">
-                      <Icon size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                      <Icon
+                        size={15}
+                        className="text-gray-400 mt-0.5 shrink-0"
+                      />
                       <div>
                         <p className="text-xs text-gray-400">{label}</p>
                         <p className="text-sm text-gray-800">{value}</p>
@@ -74,7 +102,7 @@ export default function UserProfile() {
         </div>
       </main>
 
-      <Footer />
+      {/* <Footer /> */}
 
       <LogoutModal
         open={showLogoutModal}

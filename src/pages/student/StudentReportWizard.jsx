@@ -64,7 +64,9 @@ export default function StudentReportWizard() {
     setSubmitError("");
 
     if (!getStoredAccessToken()) {
-      setSubmitError("Your session has expired. Please sign in again to submit this report.");
+      setSubmitError(
+        "Your session has expired. Please sign in again to submit this report.",
+      );
       return;
     }
 
@@ -77,7 +79,8 @@ export default function StudentReportWizard() {
     } catch (err) {
       console.error("Failed to submit report:", err);
       setSubmitError(
-        err?.message || "Something went wrong submitting your report. Please try again.",
+        err?.message ||
+          "Something went wrong submitting your report. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -113,7 +116,6 @@ export default function StudentReportWizard() {
             onContinue={() => setStep(2)}
           />
         )}
-
         {step === 2 && (
           <PrivacyModeStep
             value={form.privacyMode}
@@ -136,6 +138,7 @@ export default function StudentReportWizard() {
           <ReviewSubmitStep
             form={form}
             files={files}
+            submitting={submitting}
             onBack={() => setStep(3)}
             onSubmit={() => {
               if (!submitting) handleSubmit();

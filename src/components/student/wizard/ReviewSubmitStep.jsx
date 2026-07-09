@@ -1,8 +1,15 @@
 import { CheckCircle2 } from "../../../lib/icons";
 import { CLASSIFICATION_CONFIG } from "../../../lib/classifications";
 
-export default function ReviewSubmitStep({ form, files, onBack, onSubmit }) {
-  const config = CLASSIFICATION_CONFIG[form.category] || CLASSIFICATION_CONFIG.Academics;
+export default function ReviewSubmitStep({
+  form,
+  files,
+  onBack,
+  onSubmit,
+  submitting,
+}) {
+  const config =
+    CLASSIFICATION_CONFIG[form.category] || CLASSIFICATION_CONFIG.Academics;
 
   const rows = [
     ["Submission Type", form.submissionType],
@@ -13,9 +20,7 @@ export default function ReviewSubmitStep({ form, files, onBack, onSubmit }) {
     ["Urgency", form.urgency],
     ["Faculty", form.faculty || "—"],
     ["Department", form.department || "—"],
-    ...(config.showCourseCode
-      ? [["Course Code", form.courseCode || "—"]]
-      : []),
+    ...(config.showCourseCode ? [["Course Code", form.courseCode || "—"]] : []),
     ...config.extraFields.map(({ key, label }) => [label, form[key] || "—"]),
     ["Person Involved", form.personInvolved || "—"],
     ["Submission Mode", form.privacyMode],
@@ -27,6 +32,7 @@ export default function ReviewSubmitStep({ form, files, onBack, onSubmit }) {
       <h2 className="text-lg font-semibold text-gray-900 text-center mb-1">
         Review & Submit
       </h2>
+
       <p className="text-sm text-gray-400 text-center mb-6">
         Confirm the details below before submitting your report.
       </p>
@@ -46,16 +52,24 @@ export default function ReviewSubmitStep({ form, files, onBack, onSubmit }) {
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex-1 text-base font-medium text-gray-600 border border-gray-300 rounded-[10px] py-2.5 hover:bg-gray-50"
+          disabled={submitting}
+          className="flex-1 text-base font-medium text-gray-600 border border-gray-300 rounded-[10px] py-2.5 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Back
         </button>
+
         <button
           onClick={onSubmit}
-          className="flex-1 flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white text-base font-medium py-2.5 rounded-[10px]"
+          disabled={submitting}
+          className={`flex-1 flex items-center justify-center gap-2 text-white text-base font-medium py-2.5 rounded-[10px] ${
+            submitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-brand hover:bg-brand-dark"
+          }`}
         >
           <CheckCircle2 size={16} />
-          Submit Report
+
+          {submitting ? "Submitting..." : "Submit Report"}
         </button>
       </div>
     </div>

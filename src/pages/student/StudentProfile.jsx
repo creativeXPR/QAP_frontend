@@ -23,12 +23,12 @@ export default function StudentProfile() {
           Profile &amp; Help
         </h2>
 
-        <div className="inline-flex items-center gap-1 bg-gray-100 rounded-full p-1 mb-6 flex-wrap">
+        <div className="grid grid-cols-2 gap-2 bg-gray-100 rounded-2xl p-2 mb-6 w-full lg:w-[45%] lg:flex lg:flex-nowrap lg:items-center lg:justify-center lg:gap-1 lg:rounded-full">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className={`text-sm font-medium px-4 py-1.5 rounded-full transition-colors ${
+              className={`w-full lg:w-auto text-center text-sm font-medium px-4 py-2 rounded-full transition-colors ${
                 activeTab === key
                   ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-500 hover:text-gray-700"
