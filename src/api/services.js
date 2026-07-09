@@ -9,13 +9,19 @@ const students = {
   records: createResource("/api/students/"),
   feedback: createResource("/api/students/feedback/"),
   feedbackTracking: {
-    list: (params, options) => api.get("/api/students/feedback-tracking/", params, options),
-    create: (payload, options) => api.post("/api/students/feedback-tracking/", payload, options),
+    list: (params, options) =>
+      api.get("/api/students/feedback-tracking/", params, options),
+    create: (payload, options) =>
+      api.post("/api/students/feedback-tracking/", payload, options),
   },
   notifications: {
     ...createResource("/api/students/notifications/"),
     markRead: (id, options) =>
-      api.post(`/api/students/notifications/${id}/mark-read/`, undefined, options),
+      api.post(
+        `/api/students/notifications/${id}/mark-read/`,
+        undefined,
+        options,
+      ),
   },
 };
 
@@ -33,7 +39,11 @@ const lecturers = {
   profiles: {
     ...createResource("/api/lecturers/lecturer-profiles/"),
     summary: (id, params, options) =>
-      api.get(`/api/lecturers/lecturer-profiles/${id}/assessment_summary/`, params, options),
+      api.get(
+        `/api/lecturers/lecturer-profiles/${id}/assessment_summary/`,
+        params,
+        options,
+      ),
   },
   assessmentReports: createResource("/api/lecturers/assessment-reports/"),
 };
@@ -48,7 +58,8 @@ const accreditation = {
   metrics: createResource("/api/accreditation/metrics/"),
   submissions: {
     ...createResource("/api/accreditation/submissions/"),
-    bulk: (payload, options) => api.post("/api/accreditation/submissions/bulk/", payload, options),
+    bulk: (payload, options) =>
+      api.post("/api/accreditation/submissions/bulk/", payload, options),
   },
   evidence: {
     ...createResource("/api/accreditation/evidence/"),
@@ -60,7 +71,11 @@ const accreditation = {
   alerts: {
     ...createResource("/api/accreditation/alerts/"),
     acknowledge: (id, payload, options) =>
-      api.patch(`/api/accreditation/alerts/${id}/acknowledge/`, payload, options),
+      api.patch(
+        `/api/accreditation/alerts/${id}/acknowledge/`,
+        payload,
+        options,
+      ),
     resolve: (id, payload, options) =>
       api.patch(`/api/accreditation/alerts/${id}/resolve/`, payload, options),
     escalate: (id, payload, options) =>
@@ -97,36 +112,59 @@ const analytics = {
   accreditationOverview: (params, options) =>
     api.get("/api/analytics/accreditation/overview/", params, options),
   programmesByRisk: (params, options) =>
-    api.get("/api/analytics/accreditation/programmes-by-risk/", params, options),
+    api.get(
+      "/api/analytics/accreditation/programmes-by-risk/",
+      params,
+      options,
+    ),
   componentPerformance: (params, options) =>
-    api.get("/api/analytics/accreditation/component-performance/", params, options),
+    api.get(
+      "/api/analytics/accreditation/component-performance/",
+      params,
+      options,
+    ),
   earlyWarning: (params, options) =>
     api.get("/api/analytics/accreditation/early-warning/", params, options),
   facultySummary: (params, options) =>
     api.get("/api/analytics/accreditation/faculty-summary/", params, options),
   departmentSummary: (params, options) =>
-    api.get("/api/analytics/accreditation/department-summary/", params, options),
+    api.get(
+      "/api/analytics/accreditation/department-summary/",
+      params,
+      options,
+    ),
   timeline: (params, options) =>
     api.get("/api/analytics/accreditation/timeline/", params, options),
+  kpis: {
+    list: () => api.get("/api/analytics/kpis/"),
+  },
 };
 
 const dashboards = {
-  summary: (params, options) => api.get("/api/dashboards/summary/", params, options),
+  summary: (params, options) =>
+    api.get("/api/dashboards/summary/", params, options),
   universityOverview: (params, options) =>
     api.get("/api/dashboards/university-overview/", params, options),
-  accreditation: (params, options) => api.get("/api/dashboards/accreditation/", params, options),
-  qaCommittee: (params, options) => api.get("/api/dashboards/qa-committee/", params, options),
+  accreditation: (params, options) =>
+    api.get("/api/dashboards/accreditation/", params, options),
+  qaCommittee: (params, options) =>
+    api.get("/api/dashboards/qa-committee/", params, options),
   teachingLearning: (params, options) =>
     api.get("/api/dashboards/teaching-learning/", params, options),
-  examinations: (params, options) => api.get("/api/dashboards/examinations/", params, options),
-  documents: (params, options) => api.get("/api/dashboards/documents/", params, options),
+  examinations: (params, options) =>
+    api.get("/api/dashboards/examinations/", params, options),
+  documents: (params, options) =>
+    api.get("/api/dashboards/documents/", params, options),
   studentExperience: (params, options) =>
     api.get("/api/dashboards/student-experience/", params, options),
   infrastructureLabs: (params, options) =>
     api.get("/api/dashboards/infrastructure-labs/", params, options),
-  research: (params, options) => api.get("/api/dashboards/research/", params, options),
-  earlyWarning: (params, options) => api.get("/api/dashboards/early-warning/", params, options),
-  activityFeed: (params, options) => api.get("/api/dashboards/activity-feed/", params, options),
+  research: (params, options) =>
+    api.get("/api/dashboards/research/", params, options),
+  earlyWarning: (params, options) =>
+    api.get("/api/dashboards/early-warning/", params, options),
+  activityFeed: (params, options) =>
+    api.get("/api/dashboards/activity-feed/", params, options),
 };
 
 const qaCommittee = {
@@ -145,13 +183,21 @@ const qaCommittee = {
     markHeld: (id, payload, options) =>
       api.post(`/api/qa-committee/meetings/${id}/mark-held/`, payload, options),
     attendance: (id, payload, options) =>
-      api.post(`/api/qa-committee/meetings/${id}/attendance/`, payload, options),
+      api.post(
+        `/api/qa-committee/meetings/${id}/attendance/`,
+        payload,
+        options,
+      ),
   },
   attendance: createResource("/api/qa-committee/attendance/"),
   auditCycles: {
     ...createResource("/api/qa-committee/audit-cycles/"),
     submit: (id, payload, options) =>
-      api.post(`/api/qa-committee/audit-cycles/${id}/submit/`, payload, options),
+      api.post(
+        `/api/qa-committee/audit-cycles/${id}/submit/`,
+        payload,
+        options,
+      ),
     close: (id, payload, options) =>
       api.post(`/api/qa-committee/audit-cycles/${id}/close/`, payload, options),
   },
@@ -165,18 +211,38 @@ const qaCommittee = {
   recommendations: {
     ...createResource("/api/qa-committee/recommendations/"),
     accept: (id, payload, options) =>
-      api.post(`/api/qa-committee/recommendations/${id}/accept/`, payload, options),
+      api.post(
+        `/api/qa-committee/recommendations/${id}/accept/`,
+        payload,
+        options,
+      ),
     markInProgress: (id, payload, options) =>
-      api.post(`/api/qa-committee/recommendations/${id}/mark-in-progress/`, payload, options),
+      api.post(
+        `/api/qa-committee/recommendations/${id}/mark-in-progress/`,
+        payload,
+        options,
+      ),
     markImplemented: (id, payload, options) =>
-      api.post(`/api/qa-committee/recommendations/${id}/mark-implemented/`, payload, options),
+      api.post(
+        `/api/qa-committee/recommendations/${id}/mark-implemented/`,
+        payload,
+        options,
+      ),
     verify: (id, payload, options) =>
-      api.post(`/api/qa-committee/recommendations/${id}/verify/`, payload, options),
+      api.post(
+        `/api/qa-committee/recommendations/${id}/verify/`,
+        payload,
+        options,
+      ),
   },
   actionPlans: {
     ...createResource("/api/qa-committee/action-plans/"),
     submitEvidence: (id, payload, options) =>
-      api.post(`/api/qa-committee/action-plans/${id}/submit-evidence/`, payload, options),
+      api.post(
+        `/api/qa-committee/action-plans/${id}/submit-evidence/`,
+        payload,
+        options,
+      ),
   },
   evidence: {
     ...createResource("/api/qa-committee/evidence/"),
@@ -195,16 +261,22 @@ const qaCommittee = {
   dataReviews: {
     ...createResource("/api/qa-committee/data-reviews/"),
     validate: (id, payload, options) =>
-      api.post(`/api/qa-committee/data-reviews/${id}/validate/`, payload, options),
+      api.post(
+        `/api/qa-committee/data-reviews/${id}/validate/`,
+        payload,
+        options,
+      ),
     flag: (id, payload, options) =>
       api.post(`/api/qa-committee/data-reviews/${id}/flag/`, payload, options),
   },
-  summary: (params, options) => api.get("/api/qa-committee/summary/", params, options),
+  summary: (params, options) =>
+    api.get("/api/qa-committee/summary/", params, options),
   effectiveness: (params, options) =>
     api.get("/api/qa-committee/effectiveness/", params, options),
   overdueActions: (params, options) =>
     api.get("/api/qa-committee/overdue-actions/", params, options),
-  riskSummary: (params, options) => api.get("/api/qa-committee/risk-summary/", params, options),
+  riskSummary: (params, options) =>
+    api.get("/api/qa-committee/risk-summary/", params, options),
   activityFeed: (params, options) =>
     api.get("/api/qa-committee/activity-feed/", params, options),
 };
@@ -214,29 +286,65 @@ const documents = {
   documents: {
     ...createResource("/api/institutional-documents/documents/"),
     submitForReview: (id, payload, options) =>
-      api.post(`/api/institutional-documents/documents/${id}/submit-for-review/`, payload, options),
+      api.post(
+        `/api/institutional-documents/documents/${id}/submit-for-review/`,
+        payload,
+        options,
+      ),
     approve: (id, payload, options) =>
-      api.post(`/api/institutional-documents/documents/${id}/approve/`, payload, options),
+      api.post(
+        `/api/institutional-documents/documents/${id}/approve/`,
+        payload,
+        options,
+      ),
     reject: (id, payload, options) =>
-      api.post(`/api/institutional-documents/documents/${id}/reject/`, payload, options),
+      api.post(
+        `/api/institutional-documents/documents/${id}/reject/`,
+        payload,
+        options,
+      ),
     publish: (id, payload, options) =>
-      api.post(`/api/institutional-documents/documents/${id}/publish/`, payload, options),
+      api.post(
+        `/api/institutional-documents/documents/${id}/publish/`,
+        payload,
+        options,
+      ),
     archive: (id, payload, options) =>
-      api.post(`/api/institutional-documents/documents/${id}/archive/`, payload, options),
+      api.post(
+        `/api/institutional-documents/documents/${id}/archive/`,
+        payload,
+        options,
+      ),
     newVersion: (id, payload, options) =>
-      api.post(`/api/institutional-documents/documents/${id}/new-version/`, payload, options),
+      api.post(
+        `/api/institutional-documents/documents/${id}/new-version/`,
+        payload,
+        options,
+      ),
     preview: (id, options) =>
-      api.get(`/api/institutional-documents/documents/${id}/preview/`, undefined, {
-        ...options,
-        responseType: "blob",
-      }),
+      api.get(
+        `/api/institutional-documents/documents/${id}/preview/`,
+        undefined,
+        {
+          ...options,
+          responseType: "blob",
+        },
+      ),
     download: (id, options) =>
-      api.get(`/api/institutional-documents/documents/${id}/download/`, undefined, {
-        ...options,
-        responseType: "blob",
-      }),
+      api.get(
+        `/api/institutional-documents/documents/${id}/download/`,
+        undefined,
+        {
+          ...options,
+          responseType: "blob",
+        },
+      ),
     versions: (id, params, options) =>
-      api.get(`/api/institutional-documents/documents/${id}/versions/`, params, options),
+      api.get(
+        `/api/institutional-documents/documents/${id}/versions/`,
+        params,
+        options,
+      ),
   },
   versions: createResource("/api/institutional-documents/versions/"),
   accessLogs: createResource("/api/institutional-documents/access-logs/"),
