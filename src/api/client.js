@@ -158,6 +158,7 @@ export async function apiRequest(path, options = {}) {
   const isFormData = body instanceof FormData;
   const requestHeaders = {
     Accept: "application/json",
+    "ngrok-skip-browser-warning": "true", // <-- ADD THIS LINE
     ...(auth
       ? getAuthHeaders(!isFormData)
       : isFormData
