@@ -27,6 +27,7 @@ export default function FeedbackCaseCard({
     try {
       const updated = await students.feedback.partialUpdate(item.id, {
         admin_comment: reply,
+        status: 'under_review', // Sending a reply automatically sets status to "under review"
       });
       onUpdated?.(updated);
     } catch (error) {

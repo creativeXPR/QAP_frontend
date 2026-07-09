@@ -54,7 +54,7 @@ export default function ProfileTab() {
         </span>
       </div>
 
-      {/* <h3 className="text-sm font-semibold text-gray-900 mb-1">
+      <h3 className="text-sm font-semibold text-gray-900 mb-1">
         Default Privacy Mode
       </h3>
       <p className="text-xs text-gray-400 mb-4">
@@ -98,7 +98,7 @@ export default function ProfileTab() {
             </label>
           );
         })}
-      </div> */}
+      </div>
     </div>
   );
 }

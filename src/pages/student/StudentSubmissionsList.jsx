@@ -71,9 +71,9 @@ export default function StudentSubmissionsList() {
               <option>All Categories</option>
               <option>Academics</option>
               <option>Hostel/Welfare</option>
-              <option>Facility</option>
+              <option>Facilities</option>
               <option>Staff Conduct</option>
-              <option>Administrative</option>
+              <option>Admin Delays</option>
               <option>Safety/Security</option>
               <option>Results</option>
             </select>
@@ -148,6 +148,7 @@ export default function StudentSubmissionsList() {
     </StudentLayout>
   );
 }
+
 
 // import {
 //   FileText,

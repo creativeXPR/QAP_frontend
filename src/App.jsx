@@ -8,7 +8,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Unauthorized from "./pages/Unauthorized";
 
 import FPLanding from "./pages/FPLanding";
-import AdminPortal from "./pages/AdminPortal";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminStudents from "./pages/admin/AdminStudents";
+import AdminFocalPersons from "./pages/admin/AdminFocalPersons";
+import AdminPrincipalOfficers from "./pages/admin/AdminPrincipalOfficers";
 import PODashboard from "./pages/PODashboard";
 import ProfileLanding from "./pages/ProfileLanding";
 import UserProfile from "./pages/UserProfile";
@@ -53,12 +56,40 @@ function App() {
 
         {/* Admin only */}
         <Route
-          path="/admin"
+          path="/admin/dashboard"
           element={
             <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminPortal />
+              <AdminDashboard />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/admin/students"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <AdminStudents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/focal-persons"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <AdminFocalPersons />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/principal-officers"
+          element={
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <AdminPrincipalOfficers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={<Navigate to="/admin/dashboard" replace />}
         />
 
         {/* Principal Officer only */}

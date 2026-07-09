@@ -15,7 +15,7 @@ export const ROLE_HOME_ROUTES = {
   [ROLES.STUDENT]: "/student/dashboard",
   [ROLES.FOCAL_PERSON]: "/fp",
   [ROLES.PRINCIPLE_OFFICER]: "/po",
-  [ROLES.ADMIN]: "/admin",
+  [ROLES.ADMIN]: "/admin/dashboard",
 };
 
 function extractToken(data) {

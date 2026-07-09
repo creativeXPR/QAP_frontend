@@ -5,6 +5,15 @@ const core = {
   departments: createResource("/api/core/departments/"),
 };
 
+const auth = {
+  users: {
+    // GET /api/auth/google/cred/all/ — admin-only list of all registered
+    // users: { id, username, email, status, first_name, last_name, is_active }.
+    all: (params, options) =>
+      api.get("/api/auth/google/cred/all/", params, options),
+  },
+};
+
 const students = {
   records: createResource("/api/students/"),
   feedback: createResource("/api/students/feedback/"),
@@ -135,12 +144,17 @@ const analytics = {
     ),
   timeline: (params, options) =>
     api.get("/api/analytics/accreditation/timeline/", params, options),
+  // /api/analytics/kpis/ items: { id, title, description, embedlink, metrics }.
   kpis: {
-    list: () => api.get("/api/analytics/kpis/"),
+    ...createResource("/api/analytics/kpis/"),
+    list: (params, options) => api.get("/api/analytics/kpis/", params, options),
   },
+  // /api/updates/endpoints/ items: { id, category, title, description,
+  // classification, forUser, button }.
   updates: {
+    ...createResource("/api/updates/endpoints/"),
     list: (params, options) =>
-      api.get("/api/updates/endpoints", params, options),
+      api.get("/api/updates/endpoints/", params, options),
   },
 };
 
@@ -356,6 +370,7 @@ const documents = {
 
 export const qapApi = {
   core,
+  auth,
   students,
   courses,
   examinations,
@@ -370,6 +385,7 @@ export const qapApi = {
 export {
   accreditation,
   analytics,
+  auth,
   core,
   courses,
   dashboards,
