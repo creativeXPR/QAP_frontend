@@ -8,6 +8,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ChevronDownIcon,
+  ChevronRightIcon,
   UserIcon,
   Logout01Icon,
   UserCircleIcon,
@@ -80,6 +81,7 @@ function makeIcon(iconRef) {
 }
 
 export const ChevronDown = makeIcon(ChevronDownIcon);
+export const ChevronRight = makeIcon(ChevronRightIcon);
 export const User = makeIcon(UserIcon);
 export const LogOut = makeIcon(Logout01Icon);
 export const UserCircle = makeIcon(UserCircleIcon);
