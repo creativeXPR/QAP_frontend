@@ -365,7 +365,7 @@ export default function AdminPortal() {
               dashboards.activityFeed(params) already defined in
               services.js — swap the .map() source for that response's
               items once wired (see top-of-file wiring notes). */}
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">User Actions</h3>
+          {/* <h3 className="text-sm font-semibold text-gray-900 mb-3">User Actions</h3>
           <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg bg-white">
             {USER_ACTIONS.map((action) => (
               <div key={action.name + action.time} className="flex items-center justify-between px-4 py-3">
@@ -376,7 +376,7 @@ export default function AdminPortal() {
                 <span className="text-xs text-gray-400">{action.time}</span>
               </div>
             ))}
-          </div>
+          </div> */}
         </section>
 
         {/* System Analytics Dashboard — every number here (Focal/
