@@ -138,6 +138,10 @@ const analytics = {
   kpis: {
     list: () => api.get("/api/analytics/kpis/"),
   },
+  updates: {
+    list: (params, options) =>
+      api.get("/api/updates/endpoints", params, options),
+  },
 };
 
 const dashboards = {
