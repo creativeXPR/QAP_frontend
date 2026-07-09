@@ -1,11 +1,8 @@
 import { useCallback, useMemo } from "react";
-import Navbar from "../components/layout/Navbar";           // shared top nav bar
-import Footer from "../components/layout/Footer";           // shared page footer
-import AsyncState from "../components/common/AsyncState";   // loading/error/empty wrapper (imported but not yet used below)
-import FeedbackCaseCard from "../components/dashboard/FeedbackCaseCard"; // imported but not yet rendered here
-import { useApiQuery } from "../hooks/useApiResource";       // hook: fires a GET on mount, tracks {data, loading, error}
+import Navbar from "../components/layout/Navbar"; // shared top nav bar
+import { useApiQuery } from "../hooks/useApiResource"; // hook: fires a GET on mount, tracks {data, loading, error}
 import { getListItems, replaceListItem } from "../api/client"; // helpers to read paginated list responses / patch one item in them
-import { students } from "../api/services";                 // grouped API calls under /api/students/...
+import { students } from "../api/services"; // grouped API calls under /api/students/...
 import { mapFeedbackListForStaff } from "../lib/submissionMapper"; // normalizes raw feedback API rows into UI-friendly case objects
 import {
   BarChart2,
@@ -52,10 +49,30 @@ import {
 // =====================================================================
 
 const PLACEHOLDER_FORMS = [
-  { id: "form-1", icon: BookOpen, title: "Examination Administration Quality", dueDate: "January 15, 2026" },
-  { id: "form-2", icon: Activity, title: "Daily Lecture Monitoring Form", dueDate: "January 15, 2026" },
-  { id: "form-3", icon: Headphones, title: "Service Delivery & Complaint", dueDate: "January 15, 2026" },
-  { id: "form-4", icon: ShieldAlert, title: "Health Facility Issue", dueDate: "January 15, 2026" },
+  {
+    id: "form-1",
+    icon: BookOpen,
+    title: "Examination Administration Quality",
+    dueDate: "January 15, 2026",
+  },
+  {
+    id: "form-2",
+    icon: Activity,
+    title: "Daily Lecture Monitoring Form",
+    dueDate: "January 15, 2026",
+  },
+  {
+    id: "form-3",
+    icon: Headphones,
+    title: "Service Delivery & Complaint",
+    dueDate: "January 15, 2026",
+  },
+  {
+    id: "form-4",
+    icon: ShieldAlert,
+    title: "Health Facility Issue",
+    dueDate: "January 15, 2026",
+  },
 ];
 
 const PLACEHOLDER_UPDATES = [
@@ -114,7 +131,9 @@ export default function FPLanding() {
       },
       {
         label: "High/Critical Urgency",
-        value: cases.filter((c) => c.rawUrgency === "high" || c.rawUrgency === "critical").length,
+        value: cases.filter(
+          (c) => c.rawUrgency === "high" || c.rawUrgency === "critical",
+        ).length,
         icon: AlertTriangle,
         iconBg: "bg-red-50 text-red-500",
       },
@@ -220,7 +239,9 @@ export default function FPLanding() {
                   <span className="inline-block text-[11px] font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full mb-3 w-fit">
                     {update.tag}
                   </span>
-                  <p className="text-xs text-gray-400 mb-4">Due: {update.dueDate}</p>
+                  <p className="text-xs text-gray-400 mb-4">
+                    Due: {update.dueDate}
+                  </p>
                   <button className="text-sm font-medium text-gray-700 border border-gray-200 rounded-[10px] py-2 hover:bg-gray-50">
                     View
                   </button>
@@ -262,7 +283,6 @@ export default function FPLanding() {
             ))}
           </div>
         </div>
-
       </div>
 
       <Footer />

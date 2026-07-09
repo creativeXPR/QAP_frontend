@@ -40,9 +40,7 @@ export default function UserProfile() {
     initials,
     fields: [
       { icon: Briefcase, label: "Role", value: roleTag },
-
       { icon: Mail, label: "Email Address", value: storedUser.email || "—" },
-      ,
     ],
   };
 
