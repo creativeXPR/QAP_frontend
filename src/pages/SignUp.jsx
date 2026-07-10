@@ -2,11 +2,9 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "../lib/icons";
 import { registerUser } from "../lib/auth";
-import { useToast } from '../components/common/ToastContext';
+import { useToast } from "../components/common/ToastContext";
 
-const STATUS_OPTIONS = [
-  { value: "student", label: "Student" },
-];
+const STATUS_OPTIONS = [{ value: "student", label: "Student" }];
 
 export default function SignUp() {
   const { addToast } = useToast();
@@ -30,7 +28,7 @@ export default function SignUp() {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
-      addToast('warning', "Passwords do not match.");
+      addToast("warning", "Passwords do not match.");
       return;
     }
 
@@ -45,11 +43,14 @@ export default function SignUp() {
       });
       navigate("/sign-in");
       // Trigger a success toast
-      addToast('success', 'Account created successfully!');
-      addToast('info', 'Signin with your credentials to access the platform.');
+      addToast("success", "Account created successfully!");
+      addToast("info", "Signin with your credentials to access the platform.");
     } catch (err) {
       // Trigger an error toast
-      addToast('error', err.message || "An error occurred while creating your account.");
+      addToast(
+        "error",
+        err.message || "An error occurred while creating your account.",
+      );
     } finally {
       setLoading(false);
     }
@@ -58,23 +59,39 @@ export default function SignUp() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Left brand panel — hidden on mobile, shown on md+ */}
-      <div className="hidden md:flex md:w-1/2 bg-brand flex-col items-center justify-center px-10 py-16 text-center">
-        <img src="/logo.png" alt="University crest" className="h-20 w-auto object-contain mb-6" />
-
-        <h1 className="text-white text-2xl font-semibold mb-3">
-          University of Ibadan
-        </h1>
-        <h1 className="text-white text-2xl font-semibold mb-3">
-          Directorate of Quality Assurance
-        </h1>
-        <p className="text-blue-100 text-sm max-w-xs">
-          Quality Assurance...doing the right thing right every time.
-        </p>
+      <div
+        className="hidden md:flex md:w-1/2 relative flex-col items-center justify-center px-10 pt-16 pb-0 text-center"
+        style={{
+          backgroundImage: "url(/ui.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute left-0 right-0 bottom-0 bg-black/40 p-5 pb-15 text-center text-white">
+          <img
+            src="/logo.png"
+            alt="University crest"
+            className="mx-auto h-20 w-auto object-contain mb-4"
+          />
+          <h1 className="text-white text-2xl font-semibold mb-2">
+            University of Ibadan
+          </h1>
+          <h2 className="text-white text-2xl font-semibold mb-3">
+            Directorate of Quality Assurance
+          </h2>
+          <p className="text-white/85 text-sm leading-relaxed">
+            Quality Assurance...doing the right thing right every time.
+          </p>
+        </div>
       </div>
 
       {/* Mobile top banner — logo only, no heading */}
       <div className="flex md:hidden items-center justify-start px-6 py-4">
-        <img src="/logo.png" alt="University crest" className="h-16 w-auto object-contain" />
+        <img
+          src="/logo.png"
+          alt="University crest"
+          className="h-16 w-auto object-contain"
+        />
       </div>
 
       {/* Right form panel */}
@@ -181,9 +198,15 @@ export default function SignUp() {
                   type="button"
                   onClick={() => setShowConfirmPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
                 </button>
               </div>
               <p className="text-xs text-gray-400 mt-1">
@@ -202,7 +225,10 @@ export default function SignUp() {
 
           <p className="text-center text-sm text-gray-500 mt-5">
             Already have an account?{" "}
-            <Link to="/sign-in" className="text-brand font-medium hover:underline">
+            <Link
+              to="/sign-in"
+              className="text-brand font-medium hover:underline"
+            >
               Sign In
             </Link>
           </p>

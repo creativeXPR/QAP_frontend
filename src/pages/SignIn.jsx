@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "../lib/icons";
 import { getUserRole, loginUser, ROLE_HOME_ROUTES } from "../lib/auth";
-import { useToast } from '../components/common/ToastContext';
+import { useToast } from "../components/common/ToastContext";
 
 export default function SignIn() {
   const { addToast } = useToast();
@@ -28,7 +28,7 @@ export default function SignIn() {
 
       const role = data.user?.status || getUserRole();
       if (role && ROLE_HOME_ROUTES[role]) {
-        addToast('success', 'Signed in successfully.');
+        addToast("success", "Signed in successfully.");
         navigate(ROLE_HOME_ROUTES[role]);
       } else {
         // Role missing/unrecognized — send them somewhere safe rather
@@ -37,7 +37,7 @@ export default function SignIn() {
         navigate("/profile/me");
       }
     } catch (err) {
-      addToast('error', err.message || "An error occurred while signing in.");
+      addToast("error", err.message || "An error occurred while signing in.");
     } finally {
       setLoading(false);
     }
@@ -46,24 +46,39 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Left brand panel — hidden on mobile, shown on md+ */}
-      <div className="hidden md:flex md:w-1/2 bg-brand flex-col items-center justify-center px-10 py-16 text-center">
-        
-        <img src="/logo.png" alt="University crest" className="h-20 w-auto object-contain mb-6" />
-        <h1 className="text-white text-2xl font-semibold mb-3">
-          University of Ibadan
-        </h1>
-        
-        <h1 className="text-white text-2xl font-semibold mb-3">
-          Directorate of Quality Assurance
-        </h1>
-        <p className="text-blue-100 text-sm max-w-xs">
-          Quality Assurance...doing the right thing right every time.
-        </p>
+      <div
+        className="hidden md:flex md:w-1/2 relative flex-col items-center justify-center px-10 pt-16 pb-0 text-center"
+        style={{
+          backgroundImage: "url(/ui.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute left-0 right-0 bottom-0 bg-black/40 p-5 pb-15 text-center text-white">
+          <img
+            src="/logo.png"
+            alt="University crest"
+            className="mx-auto h-20 w-auto object-contain mb-4"
+          />
+          <h1 className="text-white text-2xl font-semibold mb-2">
+            University of Ibadan
+          </h1>
+          <h2 className="text-white text-2xl font-semibold mb-3">
+            Directorate of Quality Assurance
+          </h2>
+          <p className="text-white/85 text-sm leading-relaxed">
+            Quality Assurance...doing the right thing right every time.
+          </p>
+        </div>
       </div>
 
       {/* Mobile top banner — logo only, no heading */}
       <div className="flex md:hidden items-center justify-start px-6 py-4">
-        <img src="/logo.png" alt="University crest" className="h-16 w-auto object-contain" />
+        <img
+          src="/logo.png"
+          alt="University crest"
+          className="h-16 w-auto object-contain"
+        />
       </div>
 
       {/* Right form panel */}
@@ -127,7 +142,10 @@ export default function SignIn() {
                 />
                 Remember me
               </label>
-              <Link to="/forgot-password" className="text-brand font-medium hover:underline">
+              <Link
+                to="/forgot-password"
+                className="text-brand font-medium hover:underline"
+              >
                 Forgot Password?
               </Link>
             </div>
@@ -143,7 +161,10 @@ export default function SignIn() {
 
           <p className="text-center text-sm text-gray-500 mt-5">
             Don't have an account?{" "}
-            <Link to="/sign-up" className="text-brand font-medium hover:underline">
+            <Link
+              to="/sign-up"
+              className="text-brand font-medium hover:underline"
+            >
               Sign up
             </Link>
           </p>
