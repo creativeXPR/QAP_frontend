@@ -66,7 +66,7 @@ export default function StudentSubmissionsList() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="appearance-none border border-gray-200 rounded-md pl-3 pr-8 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+              className="w-full appearance-none border border-gray-200 rounded-md pl-3 pr-8 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
             >
               <option>All Categories</option>
               <option>Academics</option>
@@ -87,7 +87,7 @@ export default function StudentSubmissionsList() {
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="appearance-none border border-gray-200 rounded-md pl-3 pr-8 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+              className="w-full appearance-none border border-gray-200 rounded-md pl-3 pr-8 py-2 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
             >
               <option>All Types</option>
               <option>Complaint</option>

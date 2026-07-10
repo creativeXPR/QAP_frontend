@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import AuthExpiryListener from "./components/common/AuthExpiryListener";
 import { ROLES } from "./lib/auth";
+
+import { ToastProvider } from "./components/common/ToastContext";
 
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
@@ -25,137 +28,140 @@ import NotFound from "./pages/NotFound";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public */}
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/profile" element={<ProfileLanding />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+    <ToastProvider>
+      <BrowserRouter>
+        <AuthExpiryListener />
+        <Routes>
+          {/* Public */}
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/profile" element={<ProfileLanding />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
 
-        {/* Any authenticated user, regardless of role */}
-        <Route
-          path="/profile/me"
-          element={
-            <ProtectedRoute>
-              <UserProfile />
-            </ProtectedRoute>
-          }
-        />
+          {/* Any authenticated user, regardless of role */}
+          <Route
+            path="/profile/me"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Focal Person only */}
-        <Route
-          path="/fp"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.FOCAL_PERSON]}>
-              <FPLanding />
-            </ProtectedRoute>
-          }
-        />
+          {/* Focal Person only */}
+          <Route
+            path="/fp"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.FOCAL_PERSON]}>
+                <FPLanding />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Admin only */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/students"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminStudents />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/focal-persons"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminFocalPersons />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/principal-officers"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminPrincipalOfficers />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={<Navigate to="/admin/dashboard" replace />}
-        />
+          {/* Admin only */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/students"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminStudents />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/focal-persons"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminFocalPersons />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/principal-officers"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminPrincipalOfficers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={<Navigate to="/admin/dashboard" replace />}
+          />
 
-        {/* Principal Officer only */}
-        <Route
-          path="/po"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.PRINCIPLE_OFFICER]}>
-              <PODashboard />
-            </ProtectedRoute>
-          }
-        />
+          {/* Principal Officer only */}
+          <Route
+            path="/po"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.PRINCIPLE_OFFICER]}>
+                <PODashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* Student only */}
-        <Route
-          path="/student/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentDashboard />
-            </ProtectedRoute>
-          }
-        />
+          {/* Student only */}
+          <Route
+            path="/student/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+                <StudentDashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/student/profile"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/reports"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentSubmissionsList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/reports/new"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentReportWizard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/report/new"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentSubmissionsList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/notifications"
-          element={
-            <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
-              <StudentNotifications />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/student/profile"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+                <StudentProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/reports"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+                <StudentSubmissionsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/reports/new"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+                <StudentReportWizard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/report/new"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+                <StudentSubmissionsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/notifications"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STUDENT]}>
+                <StudentNotifications />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="*" element={<SignIn />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="*" element={<SignIn />} />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
 

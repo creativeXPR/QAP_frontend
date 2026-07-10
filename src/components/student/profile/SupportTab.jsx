@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Mail, Phone, Building2, Clock3, Plus, Minus } from "../../../lib/icons";
 
 const CONTACT_ROWS = [
-  { icon: Mail, label: "Email", value: "qa.office@ui.edu.ng" },
+  { icon: Mail, label: "Email", value: "uiqualityassuranceoffice@gmail.com" },
   { icon: Phone, label: "Phone", value: "+234 (0)2 810 1100" },
   { icon: Building2, label: "Office", value: "Senate Building, Room 2.14, University of Ibadan" },
   { icon: Clock3, label: "Hours", value: "Mon–Fri, 8:00 AM – 4:00 PM WAT" },
@@ -48,9 +48,9 @@ export default function SupportTab() {
           {CONTACT_ROWS.map(({ icon: Icon, label, value }) => (
             <div key={label} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
               <Icon size={16} className="text-gray-400 shrink-0 mt-0.5" />
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs text-gray-400">{label}</p>
-                <p className="text-sm text-gray-900">{value}</p>
+                <p className="text-sm text-gray-900 break-words">{value}</p>
               </div>
             </div>
           ))}

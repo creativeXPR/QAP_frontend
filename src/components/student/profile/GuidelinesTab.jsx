@@ -61,9 +61,9 @@ export default function GuidelinesTab() {
               className="flex items-start gap-3 border border-gray-100 rounded-lg px-4 py-3"
             >
               <Icon size={16} className="text-gray-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-gray-900">{label}</p>
-                <p className="text-xs text-gray-400">{description}</p>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 break-words">{label}</p>
+                <p className="text-xs text-gray-400 break-words">{description}</p>
               </div>
             </div>
           ))}
@@ -79,9 +79,9 @@ export default function GuidelinesTab() {
                 <span className="flex items-center justify-center w-7 h-7 rounded-full bg-brand text-white text-xs font-semibold shrink-0">
                   {step}
                 </span>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 break-words">{title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5 break-words">{description}</p>
                 </div>
               </div>
             ))}

@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff } from "../lib/icons";
 import { getUserRole, loginUser, ROLE_HOME_ROUTES } from "../lib/auth";
+import { useToast } from '../components/common/ToastContext';
 
 export default function SignIn() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -28,6 +30,7 @@ export default function SignIn() {
 
       const role = data.user?.status || getUserRole();
       if (role && ROLE_HOME_ROUTES[role]) {
+        addToast('success', 'Signed in successfully.');
         navigate(ROLE_HOME_ROUTES[role]);
       } else {
         // Role missing/unrecognized — send them somewhere safe rather
@@ -36,7 +39,9 @@ export default function SignIn() {
         navigate("/profile/me");
       }
     } catch (err) {
-      setError(err.message);
+      setError('');
+      // Trigger an error toast
+      addToast('error', err.message || "An error occurred while signing in.");
     } finally {
       setLoading(false);
     }
@@ -48,20 +53,16 @@ export default function SignIn() {
       <div className="hidden md:flex md:w-1/2 bg-brand flex-col items-center justify-center px-10 py-16 text-center">
         <img src="/logo.png" alt="University crest" className="h-20 w-auto object-contain mb-6" />
         <h1 className="text-white text-2xl font-semibold mb-3">
-          Quality Assurance Excellence
+          Directorate of Quality Assurance
         </h1>
         <p className="text-blue-100 text-sm max-w-xs">
-          Streamlining institutional quality management and continuous
-          improvement at the University of Ibadan
+          Quality Assurance...doing the right things right every time.
         </p>
       </div>
 
-      {/* Mobile top banner */}
-      <div className="flex md:hidden bg-brand flex-col items-center justify-center px-6 py-8 text-center">
-        <img src="/logo.png" alt="University crest" className="h-14 w-auto object-contain mb-3" />
-        <h1 className="text-white text-lg font-semibold">
-          Quality Assurance Excellence
-        </h1>
+      {/* Mobile top banner — logo only, no heading */}
+      <div className="flex md:hidden items-center justify-start px-6 py-4">
+        <img src="/logo.png" alt="University crest" className="h-16 w-auto object-contain" />
       </div>
 
       {/* Right form panel */}

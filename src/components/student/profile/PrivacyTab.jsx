@@ -5,11 +5,11 @@ export default function PrivacyTab() {
     <div>
       <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-lg px-4 py-4 mb-6">
         <ShieldAlert size={18} className="text-amber-600 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-amber-700 mb-1">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-amber-700 mb-1 break-words">
             Your Privacy is our Priority
           </p>
-          <p className="text-xs text-amber-700/80 leading-relaxed">
+          <p className="text-xs text-amber-700/80 leading-relaxed break-words">
             The UI Quality Assurance Portal is governed by the University of
             Ibadan Student Data Protection Policy, in alignment with Nigerian
             Data Protection Regulations (NDPR).

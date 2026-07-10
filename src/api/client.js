@@ -198,6 +198,10 @@ export async function apiRequest(path, options = {}) {
   const data = await parseResponse(response, responseType);
 
   if (!response.ok) {
+    if (response.status === 401 && auth) {
+      window.dispatchEvent(new Event("auth:expired"));
+    }
+
     throw new ApiError(
       getErrorMessage(data, response.statusText || "Request failed"),
       {

@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut } from "../../lib/icons";
 import LogoutModal from "../common/LogoutModal";
-
-const NAV_LINKS = ["Home", "About", "Mission", "Unit", "Contact"];
+import { getUserRole, ROLE_HOME_ROUTES } from "../../lib/auth";
 
 export default function Navbar({
   ctaLabel = "Submit Form",
@@ -14,6 +13,7 @@ export default function Navbar({
   const [open, setOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
+  const homeHref = ROLE_HOME_ROUTES[getUserRole()] || "/profile";
 
   const ctaClassName =
     ctaVariant === "outline"
@@ -42,11 +42,9 @@ export default function Navbar({
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-          {NAV_LINKS.map((link) => (
-            <a key={link} href="#" className="hover:text-brand">
-              {link}
-            </a>
-          ))}
+          <Link to={homeHref} className="hover:text-brand">
+            Home
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -59,12 +57,10 @@ export default function Navbar({
               Logout
             </button>
           )}
-          {ctaTo ? (
+          {ctaTo && (
             <Link to={ctaTo} className={ctaClassName}>
               {ctaLabel}
             </Link>
-          ) : (
-            <button className={ctaClassName}>{ctaLabel}</button>
           )}
           {/* Mobile menu toggle */}
           <button
@@ -79,11 +75,9 @@ export default function Navbar({
 
       {open && (
         <nav className="md:hidden flex flex-col gap-3 px-4 pb-4 text-sm text-gray-600">
-          {NAV_LINKS.map((link) => (
-            <a key={link} href="#" className="hover:text-brand">
-              {link}
-            </a>
-          ))}
+          <Link to={homeHref} className="hover:text-brand">
+            Home
+          </Link>
           {showLogout && (
             <button
               onClick={() => setShowLogoutModal(true)}

@@ -51,7 +51,7 @@ export default function UserProfile() {
 
   return (
     <div className="bg-white min-h-screen">
-      <Navbar ctaLabel="Profile" ctaVariant="outline" showLogout={false} />
+      <Navbar showLogout={false} />
 
       <main className="max-w-5xl mx-auto px-4 md:px-8 py-10">
         <div className="rounded-lg border border-gray-100 shadow-sm p-6">

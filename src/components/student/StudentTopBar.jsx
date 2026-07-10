@@ -15,9 +15,10 @@ import { getStoredUser } from "../../lib/auth";
 export default function StudentTopBar({
   name,
   date,
-  sessionLabel = "2025/2026",
+  sessionLabel,
   onMenuClick,
 }) {
+  sessionLabel = "2025/2026";
   const storedUser = getStoredUser();
   const [day, month, year] = getDateParts();
 

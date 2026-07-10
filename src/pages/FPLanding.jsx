@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/layout/Navbar"; // shared top nav bar
 import { useApiQuery } from "../hooks/useApiResource"; // hook: fires a GET on mount, tracks {data, loading, error}
 import { getListItems, replaceListItem } from "../api/client"; // helpers to read paginated list responses / patch one item in them
@@ -150,7 +151,7 @@ export default function FPLanding() {
 
   return (
     <div className="bg-white min-h-screen">
-      <Navbar />
+      <Navbar ctaLabel="View Profile" ctaTo="/profile/me" />
 
       {/* Hero — static marketing/intro copy, no API data involved.
           "Start Submission" / "View My Profile" buttons are inert;
@@ -168,9 +169,12 @@ export default function FPLanding() {
           <button className="bg-brand hover:bg-brand-dark text-white text-base font-medium px-5 py-2.5 rounded-[10px]">
             Start Submission
           </button>
-          <button className="border border-gray-300 text-gray-700 text-base font-medium px-5 py-2.5 rounded-[10px] hover:bg-gray-50">
+          <Link
+            to="/profile/me"
+            className="border border-gray-300 text-gray-700 text-base font-medium px-5 py-2.5 rounded-[10px] hover:bg-gray-50"
+          >
             View My Profile
-          </button>
+          </Link>
         </div>
       </section>
 

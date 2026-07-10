@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Menu, UserCircle } from "../../lib/icons";
 import { getDateParts } from "../../lib/date";
 import { getStoredUser } from "../../lib/auth";
@@ -35,6 +36,13 @@ export default function AdminTopBar({
         <span className="hidden sm:inline text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-md border border-gray-100">
           Administrator
         </span>
+        <Link
+          to="/profile/me"
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-brand"
+        >
+          <UserCircle size={16} />
+          <span className="hidden sm:inline">Profile</span>
+        </Link>
       </div>
     </div>
   );
