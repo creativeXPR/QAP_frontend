@@ -60,11 +60,15 @@ export default function SignUp() {
       {/* Left brand panel — hidden on mobile, shown on md+ */}
       <div className="hidden md:flex md:w-1/2 bg-brand flex-col items-center justify-center px-10 py-16 text-center">
         <img src="/logo.png" alt="University crest" className="h-20 w-auto object-contain mb-6" />
+
+        <h1 className="text-white text-2xl font-semibold mb-3">
+          University of Ibadan
+        </h1>
         <h1 className="text-white text-2xl font-semibold mb-3">
           Directorate of Quality Assurance
         </h1>
         <p className="text-blue-100 text-sm max-w-xs">
-          Quality Assurance...doing the right things right every time.
+          Quality Assurance...doing the right thing right every time.
         </p>
       </div>
 
