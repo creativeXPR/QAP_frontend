@@ -59,15 +59,18 @@ export default function SignUp() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Left brand panel — hidden on mobile, shown on md+ */}
-      <div
-        className="hidden md:flex md:w-1/2 relative flex-col items-center justify-center px-10 pt-16 pb-0 text-center"
-        style={{
-          backgroundImage: "url(/ui.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute left-0 right-0 bottom-0 bg-black/40 p-5 pb-15 text-center text-white">
+      <div className="hidden md:flex md:w-1/2 relative flex-col items-center justify-center px-10 pt-16 pb-0 text-center overflow-hidden">
+        {/* Lazy-loaded background image */}
+        <img
+          src="/ui.png"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+
+        <div className="absolute left-0 right-0 bottom-0 bg-black/40 p-5 pb-15 text-center text-white z-10">
           <img
             src="/logo.png"
             alt="University crest"

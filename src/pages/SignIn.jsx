@@ -45,34 +45,42 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
-      {/* Left brand panel — hidden on mobile, shown on md+ */}
-      <div
-        className="hidden md:flex md:w-1/2 relative flex-col items-center justify-center px-10 pt-16 pb-0 text-center"
-        style={{
-          backgroundImage: "url(/ui.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute left-0 right-0 bottom-0 bg-black/40 p-5 pb-15 text-center text-white">
+      {/* Left brand panel — hidden on mobile */}
+      <div className="hidden md:flex md:w-1/2 relative items-center justify-center overflow-hidden">
+        {/* Lazy-loaded background image */}
+        <img
+          src="/ui.png"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+
+        {/* Optional dark overlay */}
+        <div className="absolute inset-0 bg-black/20" />
+
+        {/* Bottom content */}
+        <div className="absolute left-0 right-0 bottom-0 bg-black/40 p-5 pb-15 text-center text-white z-10">
           <img
             src="/logo.png"
             alt="University crest"
             className="mx-auto h-20 w-auto object-contain mb-4"
           />
-          <h1 className="text-white text-2xl font-semibold mb-2">
-            University of Ibadan
-          </h1>
-          <h2 className="text-white text-2xl font-semibold mb-3">
+
+          <h1 className="text-2xl font-semibold mb-2">University of Ibadan</h1>
+
+          <h2 className="text-2xl font-semibold mb-3">
             Directorate of Quality Assurance
           </h2>
+
           <p className="text-white/85 text-sm leading-relaxed">
             Quality Assurance...doing the right thing right every time.
           </p>
         </div>
       </div>
 
-      {/* Mobile top banner — logo only, no heading */}
+      {/* Mobile top banner */}
       <div className="flex md:hidden items-center justify-start px-6 py-4">
         <img
           src="/logo.png"
@@ -87,6 +95,7 @@ export default function SignIn() {
           <h2 className="text-2xl font-semibold text-gray-900 mb-1">
             Welcome Back
           </h2>
+
           <p className="text-sm text-gray-500 mb-6">
             Sign in to access your Quality Assurance Workspace
           </p>
@@ -96,6 +105,7 @@ export default function SignIn() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email or Username
               </label>
+
               <input
                 type="text"
                 name="email"
@@ -111,6 +121,7 @@ export default function SignIn() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
+
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -121,6 +132,7 @@ export default function SignIn() {
                   placeholder="Enter your password"
                   className="w-full rounded-md border border-gray-300 px-3 py-2.5 pr-10 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
@@ -142,6 +154,7 @@ export default function SignIn() {
                 />
                 Remember me
               </label>
+
               <Link
                 to="/forgot-password"
                 className="text-brand font-medium hover:underline"
