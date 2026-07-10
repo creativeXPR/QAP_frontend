@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut } from "../../lib/icons";
 import LogoutModal from "../common/LogoutModal";
-import { getUserRole, ROLE_HOME_ROUTES } from "../../lib/auth";
+import { getUserRole, ROLE_HOME_ROUTES, logout } from "../../lib/auth";
+import { useToast } from "../common/ToastContext";
 
 export default function Navbar({
   ctaLabel = "Submit Form",
@@ -10,6 +11,7 @@ export default function Navbar({
   ctaTo,
   showLogout = true,
 }) {
+  const { addToast } = useToast();
   const [open, setOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
@@ -22,6 +24,8 @@ export default function Navbar({
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
+    logout();
+    addToast("success", "Signed out successfully.");
     navigate("/sign-in");
   };
 

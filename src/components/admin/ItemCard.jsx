@@ -2,7 +2,7 @@ import { FileText, Calendar, Pencil, Trash2 } from "../../lib/icons";
 
 export default function ItemCard({ title, subtitle, badge, badgeColor = "bg-gray-100 text-gray-600", meta, icon: Icon = FileText, onEdit, onDelete }) {
   return (
-    <div className="flex items-start gap-4 p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow bg-white mb-3">
+    <div className="flex items-start gap-4 p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow bg-white">
       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand/5 text-brand shrink-0">
         <Icon size={18} />
       </div>

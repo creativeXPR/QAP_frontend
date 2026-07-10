@@ -16,6 +16,7 @@ import {
   ChevronDown,
 } from "../lib/icons";
 import AsyncState from "../components/common/AsyncState";
+import SearchFilterBar from "../components/common/SearchFilterBar";
 import { useApiQuery } from "../hooks/useApiResource";
 import { getListItems } from "../api/client";
 import { analytics } from "../api/services";
@@ -158,7 +159,7 @@ function KPICard({ kpi }) {
   } = STATUS_STYLES[kpi.status] || STATUS_STYLES.stable;
 
   return (
-    <div className="border border-gray-100 rounded-lg bg-white mb-3 overflow-hidden">
+    <div className="border border-gray-100 rounded-lg bg-white overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between gap-3 p-4 text-left"
@@ -229,6 +230,7 @@ function CollapsibleSection({
   title,
   subtitle,
   children,
+  filterNode,
   open: controlledOpen,
   onToggle,
 }) {
@@ -262,7 +264,12 @@ function CollapsibleSection({
         />
       </button>
 
-      {open && <div className="mt-4">{children}</div>}
+      {open && (
+        <div className="mt-4">
+          {filterNode}
+          {children}
+        </div>
+      )}
     </section>
   );
 }
@@ -332,6 +339,25 @@ export default function PODashboard() {
     const unique = [...new Set(kpis.map((k) => k.category).filter(Boolean))];
     return ["all", ...unique];
   }, [kpis]);
+
+  /* ---------------- Updates filter ---------------- */
+
+  const [updateSearch, setUpdateSearch] = useState("");
+  const [updateTypeFilter, setUpdateTypeFilter] = useState("all");
+
+  const updateTypeOptions = useMemo(() => {
+    const unique = [...new Set(updates.map((u) => u.type).filter(Boolean))];
+    return ["all", ...unique];
+  }, [updates]);
+
+  const filteredUpdates = useMemo(() => {
+    const query = updateSearch.trim().toLowerCase();
+    return updates.filter((u) => {
+      const matchesSearch = !query || (u.title || "").toLowerCase().includes(query);
+      const matchesType = updateTypeFilter === "all" || u.type === updateTypeFilter;
+      return matchesSearch && matchesType;
+    });
+  }, [updates, updateSearch, updateTypeFilter]);
 
   // const filteredKpis = useMemo(() => {
   //   return kpis.filter((kpi) => {
@@ -407,92 +433,39 @@ export default function PODashboard() {
           icon={Bell}
           title="Updates"
           subtitle="Principal updates with expandable cards for better readability"
+          filterNode={
+            <SearchFilterBar
+              searchValue={updateSearch}
+              onSearchChange={setUpdateSearch}
+              searchPlaceholder="Search by title..."
+              filters={[
+                {
+                  value: updateTypeFilter,
+                  onChange: setUpdateTypeFilter,
+                  options: updateTypeOptions.map((opt) => ({
+                    value: opt,
+                    label: opt === "all" ? "All Types" : opt,
+                  })),
+                },
+              ]}
+            />
+          }
         >
           <AsyncState
             loading={updatesLoading}
             error={updatesError}
-            empty={updates.length === 0}
+            empty={filteredUpdates.length === 0}
             onRetry={refetchUpdates}
             loadingLabel="Loading updates..."
-            emptyLabel="No updates available."
+            emptyLabel={updates.length === 0 ? "No updates available." : "No results match your filters."}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {updates.map((update) => (
+              {filteredUpdates.map((update) => (
                 <UpdateCard key={update.id} update={update} />
               ))}
             </div>
           </AsyncState>
         </CollapsibleSection>
-
-        {/* Filters */}
-        <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
-            <Search size={14} />
-            Data Filters & Controls
-          </h2>
-          <p className="text-xs text-gray-400 mb-4">
-            Search and filter KPIs by title, category and status
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <p className="text-xs text-gray-400 mb-1.5">Search Keywords</p>
-              <div className="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-2">
-                <Search size={14} className="text-gray-400" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search KPI title..."
-                  className="text-sm w-full outline-none placeholder-gray-400"
-                />
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-400 mb-1.5">Category Filter</p>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600 capitalize"
-              >
-                {categoryOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt === "all" ? "All Categories" : opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-400 mb-1.5">Status Filter</p>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600"
-              >
-                <option value="all">All Status</option>
-                <option value="improving">Improving</option>
-                <option value="stable">Stable</option>
-                <option value="declining">Declining</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-3 mt-4">
-            <button
-              onClick={resetFilters}
-              className="text-base text-brand border border-gray-200 px-4 py-2 rounded-[10px] hover:bg-gray-50"
-            >
-              Reset Filters
-            </button>
-            {/* "Apply Filters" is a no-op here since filtering already
-                happens live as you type/select, matching modern UX
-                expectations — kept for visual parity with the reference. */}
-            <button className="text-base text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-[10px]">
-              Apply Filters
-            </button>
-          </div>
-        </section>
 
         {/* KPIs (collapsible, each card independently collapsible) */}
         <div ref={kpiSectionRef}>
@@ -502,6 +475,76 @@ export default function PODashboard() {
             subtitle="KPI cards with expandable descriptions and charts"
             open={openKpis}
             onToggle={setOpenKpis}
+            filterNode={
+              <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 mb-4">
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
+                  <Search size={14} />
+                  Data Filters & Controls
+                </h2>
+                <p className="text-xs text-gray-400 mb-4">
+                  Search and filter KPIs by title, category and status
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1.5">Search Keywords</p>
+                    <div className="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-2">
+                      <Search size={14} className="text-gray-400" />
+                      <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search KPI title..."
+                        className="text-sm w-full outline-none placeholder-gray-400"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1.5">Category Filter</p>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600 capitalize"
+                    >
+                      {categoryOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt === "all" ? "All Categories" : opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1.5">Status Filter</p>
+                    <select
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                      className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="improving">Improving</option>
+                      <option value="stable">Stable</option>
+                      <option value="declining">Declining</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-4">
+                  <button
+                    onClick={resetFilters}
+                    className="text-base text-brand border border-gray-200 px-4 py-2 rounded-[10px] hover:bg-gray-50"
+                  >
+                    Reset Filters
+                  </button>
+                  {/* "Apply Filters" is a no-op here since filtering already
+                      happens live as you type/select, matching modern UX
+                      expectations — kept for visual parity with the reference. */}
+                  <button className="text-base text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-[10px]">
+                    Apply Filters
+                  </button>
+                </div>
+              </section>
+            }
           >
             <AsyncState
               loading={kpisLoading}
@@ -509,11 +552,13 @@ export default function PODashboard() {
               empty={filteredKpis.length === 0}
               onRetry={refetchKpis}
               loadingLabel="Loading KPIs..."
-              emptyLabel="No KPIs found."
+              emptyLabel={kpis.length === 0 ? "No KPIs found." : "No results match your filters."}
             >
-              {filteredKpis.map((kpi) => (
-                <KPICard key={kpi.id} kpi={kpi} />
-              ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {filteredKpis.map((kpi) => (
+                  <KPICard key={kpi.id} kpi={kpi} />
+                ))}
+              </div>
             </AsyncState>
           </CollapsibleSection>
         </div>

@@ -15,7 +15,7 @@ export default function ExpandableItemCard({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border border-gray-100 rounded-lg hover:shadow-sm transition-shadow bg-white mb-3 overflow-hidden">
+    <div className="border border-gray-100 rounded-lg hover:shadow-sm transition-shadow bg-white overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-start gap-4 p-4 text-left focus:outline-none"

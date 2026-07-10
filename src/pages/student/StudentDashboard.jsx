@@ -1,8 +1,9 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import StudentLayout from "../../components/student/StudentLayout";
 import AsyncState from "../../components/common/AsyncState";
+import SearchFilterBar from "../../components/common/SearchFilterBar";
 
 import {
   BarChart2,
@@ -22,6 +23,8 @@ import { getListItems } from "../../api/client";
 import { students, analytics } from "../../api/services";
 import { mapSubmissionsFromApi } from "../../lib/submissionMapper";
 import { useApiQuery } from "../../hooks/useApiResource";
+
+const ALL = "all";
 
 const STATUS_STYLES = {
   "In Review": "bg-gray-100 text-gray-500",
@@ -71,6 +74,25 @@ export default function StudentDashboard() {
       (item) => item.forUser === "student",
     );
   }, [updatesData]);
+
+  /* ---------------- Available Forms filter ---------------- */
+
+  const [formSearch, setFormSearch] = useState("");
+  const [formCategoryFilter, setFormCategoryFilter] = useState(ALL);
+
+  const formCategoryOptions = useMemo(() => {
+    const unique = [...new Set(availableForms.map((f) => f.category).filter(Boolean))];
+    return [ALL, ...unique];
+  }, [availableForms]);
+
+  const filteredAvailableForms = useMemo(() => {
+    const query = formSearch.trim().toLowerCase();
+    return availableForms.filter((form) => {
+      const matchesSearch = !query || (form.title || "").toLowerCase().includes(query);
+      const matchesCategory = formCategoryFilter === ALL || form.category === formCategoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [availableForms, formSearch, formCategoryFilter]);
 
   const stats = [
     {
@@ -137,16 +159,36 @@ export default function StudentDashboard() {
             </p>
           </div>
 
+          <SearchFilterBar
+            searchValue={formSearch}
+            onSearchChange={setFormSearch}
+            searchPlaceholder="Search by title..."
+            filters={[
+              {
+                value: formCategoryFilter,
+                onChange: setFormCategoryFilter,
+                options: formCategoryOptions.map((opt) => ({
+                  value: opt,
+                  label: opt === ALL ? "All Categories" : opt,
+                })),
+              },
+            ]}
+          />
+
           <AsyncState
             loading={updatesLoading}
             error={updatesError}
-            empty={availableForms.length === 0}
+            empty={filteredAvailableForms.length === 0}
             onRetry={refetchUpdates}
             loadingLabel="Loading available forms..."
-            emptyLabel="There are currently no available forms."
+            emptyLabel={
+              availableForms.length === 0
+                ? "There are currently no available forms."
+                : "No results match your filters."
+            }
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-              {availableForms.map((form) => {
+              {filteredAvailableForms.map((form) => {
                 const Icon = CATEGORY_ICONS[form.category] || BookOpen;
 
                 return (

@@ -63,6 +63,7 @@ import {
   Activity01Icon,
   BookOpen01Icon,
   HeartIcon,
+  CancelCircleIcon,
 } from "@hugeicons/core-free-icons";
 
 function makeIcon(iconRef) {
@@ -136,3 +137,4 @@ export const Loader2 = makeIcon(Loading03Icon);
 export const Activity = makeIcon(Activity01Icon);
 export const BookOpen = makeIcon(BookOpen01Icon);
 export const Heart = makeIcon(HeartIcon);
+export const XCircle = makeIcon(CancelCircleIcon);

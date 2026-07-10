@@ -10,7 +10,6 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -22,7 +21,6 @@ export default function SignIn() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
@@ -39,8 +37,6 @@ export default function SignIn() {
         navigate("/profile/me");
       }
     } catch (err) {
-      setError('');
-      // Trigger an error toast
       addToast('error', err.message || "An error occurred while signing in.");
     } finally {
       setLoading(false);
@@ -74,12 +70,6 @@ export default function SignIn() {
           <p className="text-sm text-gray-500 mb-6">
             Sign in to access your Quality Assurance Workspace
           </p>
-
-          {error && (
-            <div className="mb-4 rounded-md bg-red-50 border border-red-100 px-3 py-2 text-sm text-red-600">
-              {error}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

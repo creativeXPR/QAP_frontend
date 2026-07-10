@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "../../lib/icons";
 
-export default function CollapsibleSection({ title, defaultOpen = true, children, subtitle, actionNode }) {
+export default function CollapsibleSection({ title, defaultOpen = true, children, subtitle, actionNode, filterNode }) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
@@ -26,7 +26,12 @@ export default function CollapsibleSection({ title, defaultOpen = true, children
         </div>
       </button>
       
-      {open && <div className="p-4 border-t border-gray-100">{children}</div>}
+      {open && (
+        <div className="p-4 border-t border-gray-100">
+          {filterNode}
+          {children}
+        </div>
+      )}
     </div>
   );
 }

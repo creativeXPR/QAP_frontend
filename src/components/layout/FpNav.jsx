@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutModal from "../common/LogoutModal";
+import { logout } from "../../lib/auth";
+import { useToast } from "../common/ToastContext";
 
 export default function FpNav({ showLogout = true }) {
+  const { addToast } = useToast();
   const [open, setOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
+    logout();
+    addToast("success", "Signed out successfully.");
     navigate("/sign-in");
   };
 

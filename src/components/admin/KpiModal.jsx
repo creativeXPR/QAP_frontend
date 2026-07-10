@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Loader2, Plus, Trash2 } from "../../lib/icons";
+import { useToast } from "../common/ToastContext";
 
 const MAX_EXTRA_METRICS = 7;
 
@@ -9,8 +10,8 @@ export default function KpiModal({
   onSave,
   initialData = null,
 }) {
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -35,7 +36,6 @@ export default function KpiModal({
         setAddMetrics(false);
         setMetrics([]);
       }
-      setError(null);
     }
   }, [isOpen, initialData]);
 
@@ -64,10 +64,9 @@ export default function KpiModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     if (!form.title.trim()) {
-      setError("Title is required.");
+      addToast("warning", "Title is required.");
       setLoading(false);
       return;
     }
@@ -90,9 +89,10 @@ export default function KpiModal({
 
     try {
       await onSave(payload, initialData?.id);
+      addToast("success", initialData ? "KPI saved successfully." : "KPI created successfully.");
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to save the KPI.");
+      addToast("error", err.message || "Failed to save the KPI.");
     } finally {
       setLoading(false);
     }
@@ -116,12 +116,6 @@ export default function KpiModal({
         </div>
 
         <div className="overflow-y-auto p-6">
-          {error && (
-            <div className="mb-4 rounded-md bg-red-50 border border-red-100 px-3 py-2 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
           <form id="kpi-form" onSubmit={handleSubmit} className="space-y-5">
             {/* Title */}
             <div>

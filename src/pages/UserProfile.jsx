@@ -4,7 +4,8 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import LogoutModal from "../components/common/LogoutModal";
 import { Briefcase, Building2, Mail, ShieldCheck, LogOut } from "../lib/icons";
-import { getStoredUser } from "../lib/auth";
+import { getStoredUser, logout } from "../lib/auth";
+import { useToast } from "../components/common/ToastContext";
 
 function getRoleLabel(status) {
   switch (status) {
@@ -22,6 +23,7 @@ function getRoleLabel(status) {
 }
 
 export default function UserProfile() {
+  const { addToast } = useToast();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const storedUser = getStoredUser() || {};
@@ -46,6 +48,8 @@ export default function UserProfile() {
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
+    logout();
+    addToast("success", "Signed out successfully.");
     navigate("/sign-in");
   };
 

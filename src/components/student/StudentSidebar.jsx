@@ -14,6 +14,7 @@ import {
 import { getStoredUser, logout } from "../../lib/auth";
 import { formatLabel } from "../../lib/submissionMapper";
 import LogoutModal from "../common/LogoutModal";
+import { useToast } from "../common/ToastContext";
 
 const NAV_ITEMS = [
   {
@@ -49,6 +50,7 @@ const NAV_ITEMS = [
 ];
 
 function SidebarContent({ user, onNavigate }) {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -57,6 +59,8 @@ function SidebarContent({ user, onNavigate }) {
 
     // Clear authentication data
     logout();
+
+    addToast("success", "Signed out successfully.");
 
     // Redirect user
     navigate("/sign-in", {

@@ -1,98 +1,31 @@
-import { useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/layout/Navbar"; // shared top nav bar
+import Footer from "../components/layout/Footer";
+import AsyncState from "../components/common/AsyncState";
+import SearchFilterBar from "../components/common/SearchFilterBar";
 import { useApiQuery } from "../hooks/useApiResource"; // hook: fires a GET on mount, tracks {data, loading, error}
 import { getListItems, replaceListItem } from "../api/client"; // helpers to read paginated list responses / patch one item in them
-import { students } from "../api/services"; // grouped API calls under /api/students/...
-import { mapFeedbackListForStaff } from "../lib/submissionMapper"; // normalizes raw feedback API rows into UI-friendly case objects
+import { students, analytics } from "../api/services"; // grouped API calls under /api/students/... and /api/analytics/...
 import {
   BarChart2,
   CheckCircle2,
   Clock3,
   AlertTriangle,
-  Menu,
   BookOpen,
-  Activity,
-  Headphones,
-  ShieldAlert,
   Bell,
 } from "../lib/icons";
 
-// =====================================================================
-// PLACEHOLDER DATA — mirrors the reference "home" template's #forms and
-// #updates sections (Firestore `forms` / `updates` collections in the
-// old vanilla-JS app). No equivalent resource exists in
-// api/services.js for Focal Persons yet.
-//
-// TO WIRE UP REAL DATA WHEN THE BACKEND ENDPOINTS EXIST:
-//
-// 1. Add the resource to src/api/services.js, e.g. inside `students`:
-//      forms: createResource("/api/students/forms/"),
-//      updates: createResource("/api/students/updates/"),
-//    (see how `feedback: createResource("/api/students/feedback/")` is
-//    already defined there — follow that same pattern).
-//
-// 2. In this file, fetch it with useApiQuery exactly like `cases` below:
-//
-//      const { data: formsResponse, loading: formsLoading, error: formsError } =
-//        useApiQuery(useCallback(() => students.forms.list(), []));
-//      const forms = useMemo(() => getListItems(formsResponse), [formsResponse]);
-//
-//      const { data: updatesResponse, loading: updatesLoading } =
-//        useApiQuery(useCallback(() => students.updates.list(), []));
-//      const updates = useMemo(() => getListItems(updatesResponse), [updatesResponse]);
-//
-// 3. Replace PLACEHOLDER_FORMS.map(...) / PLACEHOLDER_UPDATES.map(...)
-//    below with forms.map(...) / updates.map(...), and wrap each section
-//    in <AsyncState loading={...} error={...}> (already imported above)
-//    so spinners/error states show automatically, matching the `cases`
-//    section's pattern.
-// =====================================================================
-
-const PLACEHOLDER_FORMS = [
-  {
-    id: "form-1",
-    icon: BookOpen,
-    title: "Examination Administration Quality",
-    dueDate: "January 15, 2026",
-  },
-  {
-    id: "form-2",
-    icon: Activity,
-    title: "Daily Lecture Monitoring Form",
-    dueDate: "January 15, 2026",
-  },
-  {
-    id: "form-3",
-    icon: Headphones,
-    title: "Service Delivery & Complaint",
-    dueDate: "January 15, 2026",
-  },
-  {
-    id: "form-4",
-    icon: ShieldAlert,
-    title: "Health Facility Issue",
-    dueDate: "January 15, 2026",
-  },
-];
-
-const PLACEHOLDER_UPDATES = [
-  {
-    id: "update-1",
-    type: "Academic",
-    title: "Evaluation of Staff Duty Efficiency",
-    tag: "Form",
-    dueDate: "January 18, 2026",
-  },
-];
-
-const STATUS_STYLES = {
-  Pending: "bg-amber-50 text-amber-600",
-  "Under Review": "bg-gray-100 text-gray-500",
-  Resolved: "bg-emerald-50 text-emerald-600",
-};
+const ALL = "all";
 
 export default function FPLanding() {
+  const navigate = useNavigate();
+  const updatesSectionRef = useRef(null);
+
+  const scrollToUpdates = () => {
+    updatesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   // Live API call: GET /api/students/feedback/ on mount.
   // `feedbackResponse` is the raw (possibly paginated) API payload;
   // `setFeedbackResponse` lets us patch it locally after an update
@@ -105,42 +38,47 @@ export default function FPLanding() {
     setData: setFeedbackResponse,
   } = useApiQuery(useCallback(() => students.feedback.list(), []));
 
-  // Unwrap the raw response into a plain array, then normalize each row
-  // into the shape the UI/cards expect (status labels, urgency, etc.).
-  // Recomputes only when feedbackResponse actually changes.
-  const cases = useMemo(
-    () => mapFeedbackListForStaff(getListItems(feedbackResponse)),
-    [feedbackResponse],
+  // Live API call: GET /api/updates/endpoints/ on mount, filtered to
+  // this role — mirrors how StudentDashboard.jsx does it for
+  // forUser === "student".
+  const {
+    data: updatesResponse,
+    loading: updatesLoading,
+    error: updatesError,
+    refetch: refetchUpdates,
+  } = useApiQuery(useCallback(() => analytics.updates.list(), []));
+
+  const fpUpdates = useMemo(
+    () => getListItems(updatesResponse).filter((item) => item.forUser === "focal_person"),
+    [updatesResponse],
   );
 
-  // Derives the 4 summary stat cards from `cases` — no separate API
-  // call needed since it's just counting/filtering data already fetched.
+  // Total count of updates available to this focal person.
   const stats = useMemo(
     () => [
-      { label: "Total Cases", value: cases.length, icon: BarChart2 },
-      {
-        label: "Resolved",
-        value: cases.filter((c) => c.rawStatus === "resolved").length,
-        icon: CheckCircle2,
-        iconBg: "bg-emerald-50 text-emerald-600",
-      },
-      {
-        label: "Pending",
-        value: cases.filter((c) => c.rawStatus === "pending").length,
-        icon: Clock3,
-        iconBg: "bg-amber-50 text-amber-600",
-      },
-      {
-        label: "High/Critical Urgency",
-        value: cases.filter(
-          (c) => c.rawUrgency === "high" || c.rawUrgency === "critical",
-        ).length,
-        icon: AlertTriangle,
-        iconBg: "bg-red-50 text-red-500",
-      },
+      { label: "Total Update", value: fpUpdates.length, icon: BarChart2 },
     ],
-    [cases],
+    [fpUpdates],
   );
+
+  /* ---------------- Updates filter ---------------- */
+
+  const [updateSearch, setUpdateSearch] = useState("");
+  const [updateCategoryFilter, setUpdateCategoryFilter] = useState(ALL);
+
+  const updateCategoryOptions = useMemo(() => {
+    const unique = [...new Set(fpUpdates.map((u) => u.category).filter(Boolean))];
+    return [ALL, ...unique];
+  }, [fpUpdates]);
+
+  const filteredFpUpdates = useMemo(() => {
+    const query = updateSearch.trim().toLowerCase();
+    return fpUpdates.filter((u) => {
+      const matchesSearch = !query || (u.title || "").toLowerCase().includes(query);
+      const matchesCategory = updateCategoryFilter === ALL || u.category === updateCategoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [fpUpdates, updateSearch, updateCategoryFilter]);
 
   // Called after a case is edited elsewhere (e.g. a modal/detail view
   // calling a PATCH endpoint) — splices the updated item back into
@@ -153,10 +91,7 @@ export default function FPLanding() {
     <div className="bg-white min-h-screen">
       <Navbar ctaLabel="View Profile" ctaTo="/profile/me" />
 
-      {/* Hero — static marketing/intro copy, no API data involved.
-          "Start Submission" / "View My Profile" buttons are inert;
-          wire them to navigation (e.g. react-router `useNavigate`)
-          once the target routes exist. */}
+      {/* Hero — static marketing/intro copy, no API data involved. */}
       <section className="max-w-3xl mx-auto text-center px-4 pt-14 pb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
           Welcome to the Quality Assurance Platform
@@ -166,7 +101,10 @@ export default function FPLanding() {
           status, and meet deadlines with ease.
         </p>
         <div className="flex items-center justify-center gap-3">
-          <button className="bg-brand hover:bg-brand-dark text-white text-base font-medium px-5 py-2.5 rounded-[10px]">
+          <button
+            onClick={scrollToUpdates}
+            className="bg-brand hover:bg-brand-dark text-white text-base font-medium px-5 py-2.5 rounded-[10px]"
+          >
             Start Submission
           </button>
           <Link
@@ -187,9 +125,8 @@ export default function FPLanding() {
         />
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16 space-y-6">
-        {/* Stat cards — driven by `stats` (derived from live `cases` data above).
-            Already wired to the API; no further integration needed here. */}
+      <div ref={updatesSectionRef} className="max-w-7xl mx-auto px-4 md:px-8 pb-16 space-y-6">
+        {/* Stat cards — driven by `stats` (derived from live `fpUpdates` data above). */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((s) => (
             <div
@@ -209,83 +146,79 @@ export default function FPLanding() {
           ))}
         </div>
 
-        {/* Updates — currently PLACEHOLDER_UPDATES (static array above).
-            See the "TO WIRE UP REAL DATA" comment near the top of this
-            file for how to swap in students.updates.list() once that
-            endpoint exists. */}
+        {/* Updates — live data from analytics.updates.list(), filtered to
+            forUser === "focal_person" (mirrors StudentDashboard.jsx's
+            "Available Forms" section for forUser === "student"). */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
             <Bell size={15} />
             Updates
           </p>
           <p className="text-xs text-gray-400 mb-4">
-            Select a view, to view an update
+            Quality assurance updates and forms assigned to focal persons.
           </p>
 
-          {PLACEHOLDER_UPDATES.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">
-              No updates available at the moment.
-            </p>
-          ) : (
+          <SearchFilterBar
+            searchValue={updateSearch}
+            onSearchChange={setUpdateSearch}
+            searchPlaceholder="Search by title..."
+            filters={[
+              {
+                value: updateCategoryFilter,
+                onChange: setUpdateCategoryFilter,
+                options: updateCategoryOptions.map((opt) => ({
+                  value: opt,
+                  label: opt === ALL ? "All Categories" : opt,
+                })),
+              },
+            ]}
+          />
+
+          <AsyncState
+            loading={updatesLoading}
+            error={updatesError}
+            empty={filteredFpUpdates.length === 0}
+            onRetry={refetchUpdates}
+            loadingLabel="Loading updates..."
+            emptyLabel={fpUpdates.length === 0 ? "No updates available at the moment." : "No results match your filters."}
+          >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {PLACEHOLDER_UPDATES.map((update) => (
+              {filteredFpUpdates.map((update) => (
                 <div
                   key={update.id}
                   className="border border-gray-100 rounded-lg p-4 flex flex-col"
                 >
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-brand/5 px-2 py-1 rounded-full mb-3 w-fit">
-                    <BookOpen size={12} />
-                    {update.type}
+                  <span className="flex items-center justify-center w-9 h-9 rounded-md bg-brand text-white mb-3">
+                    <BookOpen size={16} />
                   </span>
                   <p className="text-sm font-semibold text-gray-900 mb-2 flex-1">
                     {update.title}
                   </p>
-                  <span className="inline-block text-[11px] font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full mb-3 w-fit">
-                    {update.tag}
+                  {update.description && (
+                    <p className="text-xs text-gray-400 mb-3">{update.description}</p>
+                  )}
+                  <span className="inline-block text-[11px] font-medium text-brand bg-brand/5 px-2 py-0.5 rounded-full mb-3 w-fit">
+                    {update.classification || update.category}
                   </span>
-                  <p className="text-xs text-gray-400 mb-4">
-                    Due: {update.dueDate}
-                  </p>
-                  <button className="text-sm font-medium text-gray-700 border border-gray-200 rounded-[10px] py-2 hover:bg-gray-50">
-                    View
-                  </button>
+                  {update.button?.url && (
+                    <button
+                      onClick={() => {
+                        const url = update.button.url;
+                        if (url.startsWith("/")) {
+                          navigate(url);
+                          return;
+                        }
+                        window.open(url, "_blank", "noopener,noreferrer");
+                      }}
+                      className="mt-auto text-sm font-medium text-white bg-brand hover:bg-brand-dark rounded-[10px] py-2"
+                    >
+                      {update.button.label || "Open"}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
-          )}
-        </div>
-
-        {/* Available Forms — currently PLACEHOLDER_FORMS (static array above).
-            See the "TO WIRE UP REAL DATA" comment near the top of this
-            file for how to swap in students.forms.list() once that
-            endpoint exists. */}
-        <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
-          <p className="text-sm font-semibold text-gray-900 mb-1">
-            Available Forms
-          </p>
-          <p className="text-xs text-gray-400 mb-4">
-            Select a form to begin or continue a submission.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {PLACEHOLDER_FORMS.map(({ id, icon: Icon, title, dueDate }) => (
-              <div
-                key={id}
-                className="border border-gray-100 rounded-lg p-4 flex flex-col"
-              >
-                <span className="flex items-center justify-center w-9 h-9 rounded-md bg-brand text-white mb-3">
-                  <Icon size={16} />
-                </span>
-                <p className="text-sm font-semibold text-gray-900 mb-2 flex-1">
-                  {title}
-                </p>
-                <p className="text-xs text-gray-400 mb-4">Due: {dueDate}</p>
-                <button className="text-sm font-medium text-gray-700 border border-gray-200 rounded-[10px] py-2 hover:bg-gray-50">
-                  Start
-                </button>
-              </div>
-            ))}
-          </div>
+          </AsyncState>
         </div>
       </div>
 

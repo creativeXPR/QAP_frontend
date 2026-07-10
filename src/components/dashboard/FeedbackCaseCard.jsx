@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { students } from "../../api/services";
+import { useToast } from "../common/ToastContext";
 
 /**
  * Collapsible card for a single student feedback/complaint record.
@@ -14,24 +15,24 @@ export default function FeedbackCaseCard({
   onUpdated,
   onDeleted,
 }) {
+  const { addToast } = useToast();
   const [open, setOpen] = useState(false);
   const [reply, setReply] = useState(item.adminComment || "");
   const [submitting, setSubmitting] = useState(false);
-  const [actionError, setActionError] = useState(null);
 
   const isResolved = item.rawStatus === "resolved";
 
   const handleSendReply = async () => {
     setSubmitting(true);
-    setActionError(null);
     try {
       const updated = await students.feedback.partialUpdate(item.id, {
         admin_comment: reply,
         status: 'under_review', // Sending a reply automatically sets status to "under review"
       });
       onUpdated?.(updated);
+      addToast("success", "Reply sent.");
     } catch (error) {
-      setActionError(error.message || "Failed to send reply.");
+      addToast("error", error.message || "Failed to send reply.");
     } finally {
       setSubmitting(false);
     }
@@ -39,14 +40,14 @@ export default function FeedbackCaseCard({
 
   const handleToggleStatus = async () => {
     setSubmitting(true);
-    setActionError(null);
     try {
       const updated = await students.feedback.partialUpdate(item.id, {
         status: isResolved ? "pending" : "resolved",
       });
       onUpdated?.(updated);
+      addToast("success", `Marked as ${isResolved ? "pending" : "resolved"}.`);
     } catch (error) {
-      setActionError(error.message || "Failed to update status.");
+      addToast("error", error.message || "Failed to update status.");
     } finally {
       setSubmitting(false);
     }
@@ -54,18 +55,18 @@ export default function FeedbackCaseCard({
 
   const handleDelete = async () => {
     setSubmitting(true);
-    setActionError(null);
     try {
       await students.feedback.remove(item.id);
       onDeleted?.(item.id);
+      addToast("success", "Feedback deleted.");
     } catch (error) {
-      setActionError(error.message || "Failed to delete.");
+      addToast("error", error.message || "Failed to delete.");
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="border border-gray-100 rounded-lg bg-white mb-3 overflow-hidden">
+    <div className="border border-gray-100 rounded-lg bg-white overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between gap-3 p-4 text-left"
@@ -114,10 +115,6 @@ export default function FeedbackCaseCard({
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand resize-none"
               />
             </>
-          )}
-
-          {actionError && (
-            <p className="text-xs text-red-500 mb-3">{actionError}</p>
           )}
 
           <div className="flex gap-2 flex-wrap">

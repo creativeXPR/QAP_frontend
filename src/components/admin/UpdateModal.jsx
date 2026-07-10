@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Loader2 } from "../../lib/icons";
+import { useToast } from "../common/ToastContext";
 
 const CATEGORY_OPTIONS = [
   "Complaint",
@@ -28,8 +29,8 @@ export default function UpdateModal({
   forUser,
   initialData = null,
 }) {
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [form, setForm] = useState({
     category: "Complaint",
     otherCategory: "",
@@ -69,7 +70,6 @@ export default function UpdateModal({
           buttonUrl: "",
         });
       }
-      setError(null);
     }
   }, [isOpen, initialData]);
 
@@ -82,18 +82,17 @@ export default function UpdateModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     const finalCategory = form.category === "other" ? form.otherCategory : form.category;
     const finalClassification = form.classification === "other" ? form.otherClassification : form.classification;
 
     if (!finalCategory.trim()) {
-      setError("Category is required.");
+      addToast("warning", "Category is required.");
       setLoading(false);
       return;
     }
     if (!finalClassification.trim()) {
-      setError("Classification is required.");
+      addToast("warning", "Classification is required.");
       setLoading(false);
       return;
     }
@@ -115,9 +114,10 @@ export default function UpdateModal({
 
     try {
       await onSave(payload, initialData?.id);
+      addToast("success", initialData ? "Update saved successfully." : "Update created successfully.");
       onClose();
     } catch (err) {
-      setError(err.message || "Failed to save the update.");
+      addToast("error", err.message || "Failed to save the update.");
     } finally {
       setLoading(false);
     }
@@ -141,12 +141,6 @@ export default function UpdateModal({
         </div>
 
         <div className="overflow-y-auto p-6">
-          {error && (
-            <div className="mb-4 rounded-md bg-red-50 border border-red-100 px-3 py-2 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
           <form id="update-form" onSubmit={handleSubmit} className="space-y-5">
             {/* Category */}
             <div>

@@ -1,7 +1,10 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import CollapsibleSection from "../../components/admin/CollapsibleSection";
+import ItemCard from "../../components/admin/ItemCard";
 import StatCard from "../../components/dashboard/StatCard";
 import AsyncState from "../../components/common/AsyncState";
+import SearchFilterBar from "../../components/common/SearchFilterBar";
 import { useApiQuery } from "../../hooks/useApiResource";
 import { getListItems } from "../../api/client";
 import { students, auth, analytics } from "../../api/services";
@@ -13,12 +16,13 @@ import {
 } from "../../lib/icons";
 
 const ADMIN_STATUS = "admin";
-const PO_STATUS = "po";
+const PO_STATUS = "principle_officer";
 const FP_STATUS = "focal_person";
 
 const isAdminUser = (u) => u?.status === ADMIN_STATUS;
 const isPoUser = (u) => u?.status === PO_STATUS;
 const isFpUser = (u) => u?.status === FP_STATUS;
+const isStudentUser = (u) => u?.status === "student" || (!u.status && !u.is_superuser);
 
 export default function AdminDashboard() {
   const {
@@ -50,9 +54,11 @@ export default function AdminDashboard() {
 
   const allUsers = getListItems(usersResponse);
   const registeredUsersCount = allUsers.length;
+  const studentUsersCount = allUsers.filter(isStudentUser).length;
   const focalUsersCount = allUsers.filter(isFpUser).length;
   const principalUsersCount = allUsers.filter(isPoUser).length;
-  const adminUsersCount = allUsers.filter(isAdminUser).length;
+  const adminUsers = allUsers.filter(isAdminUser);
+  const adminUsersCount = adminUsers.length;
 
   const allUpdates = getListItems(updatesResponse);
   const poUpdatesCount = allUpdates.filter((u) => String(u?.forUser || "").toLowerCase() === "po").length;
@@ -62,6 +68,18 @@ export default function AdminDashboard() {
 
   const overallLoading = feedbackLoading || usersLoading || updatesLoading || kpisLoading;
   const overallError = feedbackError || usersError || updatesError || kpisError;
+
+  /* ---------------- Admin Users filter ---------------- */
+
+  const [adminSearch, setAdminSearch] = useState("");
+
+  const adminSearchQuery = adminSearch.trim().toLowerCase();
+  const filteredAdminUsers = !adminSearchQuery
+    ? adminUsers
+    : adminUsers.filter((u) => {
+        const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "";
+        return name.toLowerCase().includes(adminSearchQuery) || (u.email || "").toLowerCase().includes(adminSearchQuery);
+      });
 
   return (
     <AdminLayout title="System Overview">
@@ -104,11 +122,45 @@ export default function AdminDashboard() {
           <section>
             <h2 className="text-sm font-semibold text-gray-900 mb-4">User Roles Breakdown</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <StatCard icon={Users} label="Student Users" value={studentUsersCount} />
               <StatCard icon={TrendingUp} label="Focal Users" value={focalUsersCount} />
               <StatCard icon={Users} label="Principal Users" value={principalUsersCount} />
-              <StatCard icon={Users} label="Admin Users" value={adminUsersCount} />
             </div>
           </section>
+
+          <CollapsibleSection
+            title="Admin Users"
+            subtitle={`Total: ${adminUsersCount}`}
+            defaultOpen={false}
+            filterNode={
+              <SearchFilterBar
+                searchValue={adminSearch}
+                onSearchChange={setAdminSearch}
+                searchPlaceholder="Search by name or email..."
+              />
+            }
+          >
+            <AsyncState
+              loading={usersLoading}
+              error={usersError}
+              empty={filteredAdminUsers.length === 0}
+              loadingLabel="Loading admin users..."
+              emptyLabel={adminUsersCount === 0 ? "No admin users found." : "No results match your search."}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {filteredAdminUsers.map((u) => (
+                  <ItemCard
+                    key={u.id}
+                    icon={Users}
+                    title={[u.first_name, u.last_name].filter(Boolean).join(" ") || u.username || "—"}
+                    subtitle={u.email}
+                    badge={u.is_active ? "Active" : "Inactive"}
+                    badgeColor={u.is_active ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}
+                  />
+                ))}
+              </div>
+            </AsyncState>
+          </CollapsibleSection>
         </div>
       </AsyncState>
     </AdminLayout>
