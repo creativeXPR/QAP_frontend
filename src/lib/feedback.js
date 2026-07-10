@@ -89,12 +89,12 @@ function buildFeedbackString(form) {
  * Suggestion/etc) per the agreed naming — not the step-2 classification,
  * which instead appears inside `feedback` above.
  */
-export function buildSubmissionPayload(form) {
+export function buildSubmissionPayload(form, userType = "student") {
   const user = getStoredUser();
 
   return {
-    student: user?.username || user?.name || "",
-    student_email: user?.email || "",
+    [userType]: user?.username || user?.name || "",
+    [`${userType}_email`]: user?.email || "",
     category: CATEGORY_API_VALUES[form.submissionType] || "other",
     classification: CLASSIFICATION_API_VALUES[form.category] || "other",
     urgency: URGENCY_API_VALUES[form.urgency] || "normal",
@@ -103,8 +103,8 @@ export function buildSubmissionPayload(form) {
   };
 }
 
-export function buildSubmissionRequestBody(form, files = []) {
-  const payload = buildSubmissionPayload(form);
+export function buildSubmissionRequestBody(form, files = [], userType = "student") {
+  const payload = buildSubmissionPayload(form, userType);
   if (!files.length) return payload;
 
   const formData = new FormData();

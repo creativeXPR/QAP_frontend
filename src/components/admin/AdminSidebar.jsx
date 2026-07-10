@@ -7,11 +7,13 @@ import {
   Users,
   UserCog,
   ShieldAlert,
+  Briefcase,
 } from "../../lib/icons";
 
 const NAV_ITEMS = [
   { label: "Dashboard", to: "/admin/dashboard", icon: LayoutDashboard, end: true },
   { label: "Students", to: "/admin/students", icon: Users, end: true },
+  { label: "Staff", to: "/admin/staff", icon: Briefcase, end: true },
   { label: "Focal Persons", to: "/admin/focal-persons", icon: UserCog, end: true },
   { label: "Principal Officers", to: "/admin/principal-officers", icon: ShieldAlert, end: true },
 ];

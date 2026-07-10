@@ -7,7 +7,7 @@ const core = {
 
 const auth = {
   users: {
-    // GET /api/auth/google/cred/all/ — admin-only list of all registered
+    // GET /api/auth/google/cred/all/ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â admin-only list of all registered
     // users: { id, username, email, status, first_name, last_name, is_active }.
     all: (params, options) =>
       api.get("/api/auth/google/cred/all/", params, options),
@@ -34,6 +34,25 @@ const students = {
   },
 };
 
+const staffs = {
+  records: createResource("/api/staffs/"),
+  feedback: createResource("/api/staffs/feedback/"),
+  feedbackTracking: {
+    list: (params, options) =>
+      api.get("/api/staffs/feedback-tracking/", params, options),
+    create: (payload, options) =>
+      api.post("/api/staffs/feedback-tracking/", payload, options),
+  },
+  notifications: {
+    ...createResource("/api/staffs/notifications/"),
+    markRead: (id, options) =>
+      api.post(
+        `/api/staffs/notifications/${id}/mark-read/`,
+        undefined,
+        options,
+      ),
+  },
+};
 const courses = {
   courses: createResource("/api/courses/courses/"),
   lectureSessions: createResource("/api/courses/lecture-sessions/"),
@@ -372,6 +391,7 @@ export const qapApi = {
   core,
   auth,
   students,
+  staffs,
   courses,
   examinations,
   lecturers,
@@ -394,4 +414,5 @@ export {
   lecturers,
   qaCommittee,
   students,
+  staffs,
 };

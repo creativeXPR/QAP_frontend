@@ -14,6 +14,7 @@ export default function FeedbackCaseCard({
   actions = ["reply", "status", "delete"],
   onUpdated,
   onDeleted,
+  feedbackApi = students.feedback,
 }) {
   const { addToast } = useToast();
   const [open, setOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function FeedbackCaseCard({
   const handleSendReply = async () => {
     setSubmitting(true);
     try {
-      const updated = await students.feedback.partialUpdate(item.id, {
+      const updated = await feedbackApi.partialUpdate(item.id, {
         admin_comment: reply,
         status: 'under_review', // Sending a reply automatically sets status to "under review"
       });
@@ -41,7 +42,7 @@ export default function FeedbackCaseCard({
   const handleToggleStatus = async () => {
     setSubmitting(true);
     try {
-      const updated = await students.feedback.partialUpdate(item.id, {
+      const updated = await feedbackApi.partialUpdate(item.id, {
         status: isResolved ? "pending" : "resolved",
       });
       onUpdated?.(updated);
@@ -56,7 +57,7 @@ export default function FeedbackCaseCard({
   const handleDelete = async () => {
     setSubmitting(true);
     try {
-      await students.feedback.remove(item.id);
+      await feedbackApi.remove(item.id);
       onDeleted?.(item.id);
       addToast("success", "Feedback deleted.");
     } catch (error) {

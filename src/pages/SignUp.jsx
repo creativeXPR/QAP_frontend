@@ -4,7 +4,10 @@ import { Eye, EyeOff } from "../lib/icons";
 import { registerUser } from "../lib/auth";
 import { useToast } from "../components/common/ToastContext";
 
-const STATUS_OPTIONS = [{ value: "student", label: "Student" }];
+const STATUS_OPTIONS = [
+  { value: "student", label: "Student" },
+  { value: "staff", label: "Staff" },
+];
 
 export default function SignUp() {
   const { addToast } = useToast();
@@ -58,7 +61,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
-      {/* Left brand panel — hidden on mobile, shown on md+ */}
+      {/* Left brand panel ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â hidden on mobile, shown on md+ */}
       <div className="hidden md:flex md:w-1/2 relative flex-col items-center justify-center px-10 pt-16 pb-0 text-center overflow-hidden">
         {/* Lazy-loaded background image */}
         <img
@@ -88,7 +91,7 @@ export default function SignUp() {
         </div>
       </div>
 
-      {/* Mobile top banner — logo only, no heading */}
+      {/* Mobile top banner ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â logo only, no heading */}
       <div className="flex md:hidden items-center justify-start px-6 py-4">
         <img
           src="/logo.png"

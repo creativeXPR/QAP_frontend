@@ -5,6 +5,7 @@ export { getAuthHeaders };
 // The four roles your backend's "status" field can be.
 export const ROLES = {
   STUDENT: "student",
+  STAFF: "staff",
   FOCAL_PERSON: "focal_person",
   PRINCIPLE_OFFICER: "principle_officer",
   ADMIN: "admin",
@@ -13,6 +14,7 @@ export const ROLES = {
 // Where each role should land right after logging in.
 export const ROLE_HOME_ROUTES = {
   [ROLES.STUDENT]: "/student/dashboard",
+  [ROLES.STAFF]: "/staff/dashboard",
   [ROLES.FOCAL_PERSON]: "/fp",
   [ROLES.PRINCIPLE_OFFICER]: "/po",
   [ROLES.ADMIN]: "/admin/dashboard",
@@ -111,7 +113,7 @@ export async function loginUser(identifier, password) {
 
 /**
  * Registers a new user.
- * status must be one of: "student" | "focal_person" | "principle_officer" | "admin"
+ * status must be one of: "student" | "staff" | "focal_person" | "principle_officer" | "admin"
  */
 export async function registerUser({
   username,

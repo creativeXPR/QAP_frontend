@@ -18,10 +18,12 @@ import {
 const ADMIN_STATUS = "admin";
 const PO_STATUS = "principle_officer";
 const FP_STATUS = "focal_person";
+const STAFF_STATUS = "staff";
 
 const isAdminUser = (u) => u?.status === ADMIN_STATUS;
 const isPoUser = (u) => u?.status === PO_STATUS;
 const isFpUser = (u) => u?.status === FP_STATUS;
+const isStaffUser = (u) => u?.status === STAFF_STATUS;
 const isStudentUser = (u) => u?.status === "student" || (!u.status && !u.is_superuser);
 
 export default function AdminDashboard() {
@@ -56,6 +58,7 @@ export default function AdminDashboard() {
   const registeredUsersCount = allUsers.length;
   const studentUsersCount = allUsers.filter(isStudentUser).length;
   const focalUsersCount = allUsers.filter(isFpUser).length;
+  const staffUsersCount = allUsers.filter(isStaffUser).length;
   const principalUsersCount = allUsers.filter(isPoUser).length;
   const adminUsers = allUsers.filter(isAdminUser);
   const adminUsersCount = adminUsers.length;
@@ -121,10 +124,11 @@ export default function AdminDashboard() {
 
           <section>
             <h2 className="text-sm font-semibold text-gray-900 mb-4">User Roles Breakdown</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard icon={Users} label="Student Users" value={studentUsersCount} />
               <StatCard icon={TrendingUp} label="Focal Users" value={focalUsersCount} />
               <StatCard icon={Users} label="Principal Users" value={principalUsersCount} />
+              <StatCard icon={Users} label="Staff Users" value={staffUsersCount} />
             </div>
           </section>
 

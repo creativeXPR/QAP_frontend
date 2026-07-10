@@ -13,6 +13,7 @@ import Unauthorized from "./pages/Unauthorized";
 import FPLanding from "./pages/FPLanding";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminStudents from "./pages/admin/AdminStudents";
+import AdminStaff from "./pages/admin/AdminStaff";
 import AdminFocalPersons from "./pages/admin/AdminFocalPersons";
 import AdminPrincipalOfficers from "./pages/admin/AdminPrincipalOfficers";
 import PODashboard from "./pages/PODashboard";
@@ -24,6 +25,11 @@ import StudentReportWizard from "./pages/student/StudentReportWizard";
 import StudentNotifications from "./pages/student/StudentNotifications";
 import StudentSubmissionsList from "./pages/student/StudentSubmissionsList";
 import StudentProfile from "./pages/student/StudentProfile";
+import StaffDashboard from "./pages/staff/StaffDashboard";
+import StaffReportWizard from "./pages/staff/StaffReportWizard";
+import StaffNotifications from "./pages/staff/StaffNotifications";
+import StaffSubmissionsList from "./pages/staff/StaffSubmissionsList";
+import StaffProfile from "./pages/staff/StaffProfile";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -77,6 +83,13 @@ function App() {
             }
           />
           <Route
+            path="/admin/staff"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminStaff />
+              </ProtectedRoute>
+            }
+          />          <Route
             path="/admin/focal-persons"
             element={
               <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
@@ -158,6 +171,56 @@ function App() {
             }
           />
 
+
+          {/* Staff only */}
+          <Route
+            path="/staff/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STAFF]}>
+                <StaffDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/profile"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STAFF]}>
+                <StaffProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/reports"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STAFF]}>
+                <StaffSubmissionsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/reports/new"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STAFF]}>
+                <StaffReportWizard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/report/new"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STAFF]}>
+                <StaffSubmissionsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff/notifications"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.STAFF]}>
+                <StaffNotifications />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<SignIn />} />
         </Routes>
       </BrowserRouter>
