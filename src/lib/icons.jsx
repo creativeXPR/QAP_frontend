@@ -64,6 +64,8 @@ import {
   BookOpen01Icon,
   HeartIcon,
   CancelCircleIcon,
+  CalendarIcon,
+  SentIcon
 } from "@hugeicons/core-free-icons";
 
 function makeIcon(iconRef) {
@@ -81,6 +83,10 @@ function makeIcon(iconRef) {
   };
 }
 
+
+
+
+export const Send = makeIcon(SentIcon)
 export const ChevronDown = makeIcon(ChevronDownIcon);
 export const ChevronRight = makeIcon(ChevronRightIcon);
 export const User = makeIcon(UserIcon);
