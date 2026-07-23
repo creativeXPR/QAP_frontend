@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import StudentLayout from "../../components/student/StudentLayout";
 import AsyncState from "../../components/common/AsyncState";
 import SearchFilterBar from "../../components/common/SearchFilterBar";
+import KPICard from "../../components/dashboard/KPICard";
+import CollapsibleSection from "../../components/dashboard/CollapsibleSection";
 
 import {
   BarChart2,
@@ -17,6 +19,7 @@ import {
   UserCog,
   ShieldAlert,
   ClipboardList,
+  Search,
 } from "../../lib/icons";
 
 import { getListItems } from "../../api/client";
@@ -93,6 +96,67 @@ export default function StudentDashboard() {
       return matchesSearch && matchesCategory;
     });
   }, [availableForms, formSearch, formCategoryFilter]);
+
+  /* ---------------- KPIs ---------------- */
+
+  const [kpisOpen, setKpisOpen] = useState(true);
+
+  const {
+    data: kpiResponse,
+    loading: kpisLoading,
+    error: kpisError,
+    refetch: refetchKpis,
+  } = useApiQuery(useCallback(() => analytics.kpis.list(), []));
+
+  const kpis = useMemo(() => {
+    return getListItems(kpiResponse).map((item) => {
+      const metrics = item.metrics ?? {};
+      const firstMetric = Object.values(metrics)[0];
+
+      return {
+        id: item.id,
+        title: item.title,
+        category: "General",
+        status: "stable",
+        value: firstMetric ?? "--",
+        changePercent: "",
+        changePeriod: "",
+        analysisText: item.description,
+        embedLink: item.embedlink,
+        metrics,
+      };
+    });
+  }, [kpiResponse]);
+
+  const kpiCategoryOptions = useMemo(() => {
+    const unique = [...new Set(kpis.map((k) => k.category).filter(Boolean))];
+    return [ALL, ...unique];
+  }, [kpis]);
+
+  const [kpiSearch, setKpiSearch] = useState("");
+  const [kpiCategoryFilter, setKpiCategoryFilter] = useState(ALL);
+  const [kpiStatusFilter, setKpiStatusFilter] = useState(ALL);
+
+  const filteredKpis = useMemo(() => {
+    return kpis.filter((kpi) => {
+      const matchesSearch =
+        !kpiSearch ||
+        kpi.title.toLowerCase().includes(kpiSearch.toLowerCase()) ||
+        (kpi.analysisText ?? "").toLowerCase().includes(kpiSearch.toLowerCase());
+
+      const matchesCategory = kpiCategoryFilter === ALL || kpi.category === kpiCategoryFilter;
+
+      const matchesStatus = kpiStatusFilter === ALL || kpi.status === kpiStatusFilter;
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [kpis, kpiSearch, kpiCategoryFilter, kpiStatusFilter]);
+
+  const resetKpiFilters = () => {
+    setKpiSearch("");
+    setKpiCategoryFilter(ALL);
+    setKpiStatusFilter(ALL);
+  };
 
   const stats = [
     {
@@ -253,6 +317,97 @@ export default function StudentDashboard() {
             </div>
           </AsyncState>
         </div>
+
+        {/* KPIs (collapsible, each card independently collapsible) */}
+        <CollapsibleSection
+          icon={BarChart2}
+          title="KPIs"
+          subtitle="KPI cards with expandable descriptions and charts"
+          open={kpisOpen}
+          onToggle={setKpisOpen}
+          filterNode={
+            <section className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 mb-4">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-1">
+                <Search size={14} />
+                Data Filters & Controls
+              </h2>
+              <p className="text-xs text-gray-400 mb-4">
+                Search and filter KPIs by title, category and status
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1.5">Search Keywords</p>
+                  <div className="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-2">
+                    <Search size={14} className="text-gray-400" />
+                    <input
+                      value={kpiSearch}
+                      onChange={(e) => setKpiSearch(e.target.value)}
+                      placeholder="Search KPI title..."
+                      className="text-sm w-full outline-none placeholder-gray-400"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400 mb-1.5">Category Filter</p>
+                  <select
+                    value={kpiCategoryFilter}
+                    onChange={(e) => setKpiCategoryFilter(e.target.value)}
+                    className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600 capitalize"
+                  >
+                    {kpiCategoryOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt === ALL ? "All Categories" : opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400 mb-1.5">Status Filter</p>
+                  <select
+                    value={kpiStatusFilter}
+                    onChange={(e) => setKpiStatusFilter(e.target.value)}
+                    className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="improving">Improving</option>
+                    <option value="stable">Stable</option>
+                    <option value="declining">Declining</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={resetKpiFilters}
+                  className="text-base text-brand border border-gray-200 px-4 py-2 rounded-[10px] hover:bg-gray-50"
+                >
+                  Reset Filters
+                </button>
+                <button className="text-base text-white bg-brand hover:bg-brand-dark px-4 py-2 rounded-[10px]">
+                  Apply Filters
+                </button>
+              </div>
+            </section>
+          }
+        >
+          <AsyncState
+            loading={kpisLoading}
+            error={kpisError}
+            empty={filteredKpis.length === 0}
+            onRetry={refetchKpis}
+            loadingLabel="Loading KPIs..."
+            emptyLabel={kpis.length === 0 ? "No KPIs found." : "No results match your filters."}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {filteredKpis.map((kpi) => (
+                <KPICard key={kpi.id} kpi={kpi} />
+              ))}
+            </div>
+          </AsyncState>
+        </CollapsibleSection>
 
         {/* Recent Reports */}
         <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
