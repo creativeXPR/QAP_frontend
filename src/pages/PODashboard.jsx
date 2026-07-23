@@ -1,7 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
 import StatCard from "../components/dashboard/StatCard";
-import KPICard from "../components/dashboard/KPICard";
-import CollapsibleSection from "../components/dashboard/CollapsibleSection";
 import {
   Search,
   FileText,
@@ -11,9 +9,10 @@ import {
   BookOpen,
   Briefcase,
   LayoutDashboard,
-  PlusSquare,
-  Send,
-  User,
+  ChevronDown,
+  TrendingUp,
+  TrendingDown,
+  Minus,
   LogOut,
 } from "../lib/icons";
 import AsyncState from "../components/common/AsyncState";
@@ -23,6 +22,24 @@ import { getListItems } from "../api/client";
 import { analytics } from "../api/services";
 
 // Dynamic Status Icons and Styles
+const STATUS_STYLES = {
+  improving: {
+    icon: TrendingUp,
+    label: "Improving",
+    className: "text-emerald-600 bg-emerald-50",
+  },
+  stable: {
+    icon: Minus,
+    label: "Stable",
+    className: "text-amber-600 bg-amber-50",
+  },
+  declining: {
+    icon: TrendingDown,
+    label: "Declining",
+    className: "text-red-500 bg-red-50",
+  },
+};
+
 const TYPE_ICON = {
   Academic: BookOpen,
   Administrative: Briefcase,
@@ -140,7 +157,6 @@ function KPICard({ kpi }) {
 }
 
 export default function PODashboard() {
-  // Sidebar Navigation State: 'Dashboard' | 'KPIs' | 'Updates' | 'Submissions' | 'Notifications' | 'Profile'
   const [activeSidebarNav, setActiveSidebarNav] = useState("Dashboard");
 
   // Search & Filter States
@@ -247,16 +263,10 @@ export default function PODashboard() {
     setStatus("all");
   };
 
-  
-
-  // Principal Officer Custom Sidebar Options
   const navItems = [
     { label: "Dashboard", icon: LayoutDashboard },
     { label: "KPIs", icon: BarChart2, badge: kpis.length },
     { label: "Updates", icon: Bell, badge: updates.length },
-    // { label: "Submissions", icon: Send },
-    // { label: "Notifications", icon: PlusSquare },
-    // { label: "Profile", icon: User },
   ];
 
   return (
@@ -576,14 +586,6 @@ export default function PODashboard() {
                   ))}
                 </div>
               </AsyncState>
-            </div>
-          )}
-
-          {/* FALLBACK FOR UNIMPLEMENTED SIDEBAR VIEWS */}
-          {!["Dashboard", "KPIs", "Updates"].includes(activeSidebarNav) && (
-            <div className="p-12 text-center bg-white border border-gray-100 rounded-2xl shadow-sm">
-              <h3 className="text-base font-semibold text-gray-900">{activeSidebarNav} Module</h3>
-              <p className="text-xs text-gray-400 mt-1">This section is currently under development.</p>
             </div>
           )}
         </main>
